@@ -4,9 +4,9 @@ Date: 11-04-2024
 
 Version: V1 - description of EZElectronics in CURRENT form (as received by teachers)
 
-| Version number | Change |
-| :------------: | :----: |
-|       V1       |        |
+| Version number |                         Change                          |
+| :------------: | :-----------------------------------------------------: |
+|      V1.1      | Add stakeholders, context diagram, personas and stories |
 
 # Contents
 
@@ -18,6 +18,12 @@ Version: V1 - description of EZElectronics in CURRENT form (as received by teach
   - [Context Diagram](#context-diagram)
   - [Interfaces](#interfaces)
 - [Stories and personas](#stories-and-personas)
+    - [Persona 1 (Customer)](#persona-1-customer)
+      - [Characteristics](#characteristics)
+      - [Story](#story)
+    - [Persona 2 (Manager)](#persona-2-manager)
+      - [Characteristics](#characteristics-1)
+      - [Story](#story-1)
 - [Functional and non functional requirements](#functional-and-non-functional-requirements)
   - [Functional Requirements](#functional-requirements)
   - [Non Functional Requirements](#non-functional-requirements)
@@ -40,7 +46,7 @@ EZElectronics (read EaSy Electronics) is a software application designed to help
 # Stakeholders
 
 |    Stakeholder name    |                      Description                      |
-|:----------------------:|:-----------------------------------------------------:|
+| :--------------------: | :---------------------------------------------------: |
 |        Manager         |                 Managers of the store                 |
 |        Customer        |                Customers of the store                 |
 |    Payment service     |           To offer ways to pay to the users           |
@@ -48,7 +54,6 @@ EZElectronics (read EaSy Electronics) is a software application designed to help
 |        Supplier        |             Electronic devices companies              |
 |    Developing team     |        Internal or External team of engineers         |
 | Cloud Service Provider |      Cloud service in order to host out website       |
-//TODO: suppliers, competitors and developing team
 
 # Context Diagram and interfaces
 
@@ -56,35 +61,40 @@ EZElectronics (read EaSy Electronics) is a software application designed to help
 
 ![Context diagram](uml/Context-Diagram.png "Context Diagram")
 
-\<Define here Context diagram using UML use case diagram>
-
-\<actors are a subset of stakeholders>
-
 ## Interfaces
 
-\<describe here each interface in the context diagram>
+|      Actor      | Logical Interface |             Physical Interface             |
+| :-------------: | :---------------: | :----------------------------------------: |
+|     Manager     |  PC, Smartphone   |       GUI (WebUI, Browser interface)       |
+|    Customer     |  PC, Smartphone   |       GUI (WebUI, Browser interface)       |
+| Payment Service |     Internet      | For ex: Stripe https://docs.stripe.com/api |
 
-\<GUIs will be described graphically in a separate document>
-
-|        Actor         |   Logical Interface    |               Physical Interface               |
-|:--------------------:|:----------------------:|:----------------------------------------------:|
-|     Manager<br/>     |     PC, Smartphone     |         GUI (WebUI, Browser interface)         |
-|    Customer<br/>     |     PC, Smartphone     |                      GUI      (WebUI, Browser interface)                 |
-| Payment Service<br/> |        Internet        | For ex: Stripe     https://docs.stripe.com/api |
 # Stories and personas
-Persona 1: female,  an office administration responsible for the office tools.
 
-Story:
+### Persona 1 (Customer)
+
+#### Characteristics
+
+Female, an office administration responsible for the office tools.
+
+#### Story
+
 She finds out she has to provide electronic devices for engineering team and for the office such as laptop, coffee
-maker and etc. And she enters the website Ezelectronics and adds all the products in her shopping cart, and completes
+maker and etc.
+
+She enters the website EZelectronics and adds all the products in her shopping cart, and completes
 the order by paying.
 
+### Persona 2 (Manager)
 
-Persona 2: young, male, manager in Ezelectronics
+#### Characteristics
 
-Story:
+Young, male, manager in Ezelectronics
+
+#### Story
+
 He receives new stock of phones and he wants to add them to the website.
-After login, he enters the product details and the price and updates the system
+After login, he enters the product details and the price and updates the system.
 
 # Functional and non functional requirements
 
