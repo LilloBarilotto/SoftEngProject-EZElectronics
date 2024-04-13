@@ -39,15 +39,16 @@ EZElectronics (read EaSy Electronics) is a software application designed to help
 
 # Stakeholders
 
-| Stakeholder name |                                Description                                 |
-| :--------------: | :------------------------------------------------------------------------: |
-|     Manager      |                           Managers of the store                            |
-|     Customer     |                           Customers of the store                           |
-| Payment service  |                     To offer ways to pay to the users                      |
-| Developing team  |                          Will develop the website                          |
-|     Supplier     | Contracts with the supplier to sell their products (Apple, LG, Bosch, ...) |
-|    Competitor    |                            Unieuro, Mediaworld                             |
-|     Investor     |                Will bring the money to finance the project                 |
+|    Stakeholder name    |                      Description                      |
+|:----------------------:|:-----------------------------------------------------:|
+|        Manager         |                 Managers of the store                 |
+|        Customer        |                Customers of the store                 |
+|    Payment service     |           To offer ways to pay to the users           |
+|      Competitors       | Other electronic retailers like Unieuro or Mediaworld |
+|        Supplier        |             Electronic devices companies              |
+|    Developing team     |        Internal or External team of engineers         |
+| Cloud Service Provider |      Cloud service in order to host out website       |
+//TODO: suppliers, competitors and developing team
 
 # Context Diagram and interfaces
 
@@ -65,17 +66,25 @@ EZElectronics (read EaSy Electronics) is a software application designed to help
 
 \<GUIs will be described graphically in a separate document>
 
-|   Actor   | Logical Interface | Physical Interface |
-| :-------: | :---------------: | :----------------: |
-| Actor x.. |                   |                    |
-
+|        Actor         |   Logical Interface    |               Physical Interface               |
+|:--------------------:|:----------------------:|:----------------------------------------------:|
+|     Manager<br/>     |     PC, Smartphone     |         GUI (WebUI, Browser interface)         |
+|    Customer<br/>     |     PC, Smartphone     |                      GUI      (WebUI, Browser interface)                 |
+| Payment Service<br/> |        Internet        | For ex: Stripe     https://docs.stripe.com/api |
 # Stories and personas
+Persona 1: female,  an office administration responsible for the office tools.
 
-\<A Persona is a realistic impersonation of an actor. Define here a few personas and describe in plain text how a persona interacts with the system>
+Story:
+She finds out she has to provide electronic devices for engineering team and for the office such as laptop, coffee
+maker and etc. And she enters the website Ezelectronics and adds all the products in her shopping cart, and completes
+the order by paying.
 
-\<Persona is-an-instance-of actor>
 
-\<stories will be formalized later as scenarios in use cases>
+Persona 2: young, male, manager in Ezelectronics
+
+Story:
+He receives new stock of phones and he wants to add them to the website.
+After login, he enters the product details and the price and updates the system
 
 # Functional and non functional requirements
 
