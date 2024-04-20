@@ -19,12 +19,12 @@ Version: V1 - description of EZElectronics in CURRENT form (as received by teach
   - [Context Diagram](#context-diagram)
   - [Interfaces](#interfaces)
 - [Stories and personas](#stories-and-personas)
-    - [Persona 1 (Customer)](#persona-1-customer)
-      - [Characteristics](#characteristics)
-      - [Story](#story)
-    - [Persona 2 (Manager)](#persona-2-manager)
-      - [Characteristics](#characteristics-1)
-      - [Story](#story-1)
+  - [Persona 1 (Customer)](#persona-1-customer)
+    - [Characteristics](#characteristics)
+    - [Story](#story)
+  - [Persona 2 (Manager)](#persona-2-manager)
+    - [Characteristics](#characteristics-1)
+    - [Story](#story-1)
 - [Functional and non functional requirements](#functional-and-non-functional-requirements)
   - [Functional Requirements](#functional-requirements)
   - [Non Functional Requirements](#non-functional-requirements)
@@ -511,9 +511,7 @@ After login, he enters the product details and the price and updates the system.
 
 # Glossary
 
-\<use UML class diagram to define important terms, or concepts in the domain of the application, and their relationships>
-
-\<concepts must be used consistently all over the document, ex in use cases, requirements etc>
+![Glossary](uml/glossary.png "Glossary")
 
 # System Design
 
