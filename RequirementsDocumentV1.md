@@ -8,6 +8,7 @@ Version: V1 - description of EZElectronics in CURRENT form (as received by teach
 | :------------: | :-----------------------------------------------------: |
 |      V1.1      | Add stakeholders, context diagram, personas and stories |
 |      V1.2      |                  Add UCD and scenarios                  |
+|      V1.3      |                      Add glossary                       |
 
 # Contents
 
