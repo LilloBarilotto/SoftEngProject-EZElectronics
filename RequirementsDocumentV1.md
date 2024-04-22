@@ -77,15 +77,11 @@ EZElectronics (read EaSy Electronics) is a software application designed to help
 
 # Stakeholders
 
-|    Stakeholder name    |                      Description                      |
-| :--------------------: | :---------------------------------------------------: |
-|        Manager         |                 Managers of the store                 |
-|        Customer        |                Customers of the store                 |
-|    Payment service     |           To offer ways to pay to the users           |
-|      Competitors       | Other electronic retailers like Unieuro or Mediaworld |
-|        Supplier        |             Electronic devices companies              |
-|    Developing team     |        Internal or External team of engineers         |
-| Cloud Service Provider |      Cloud service in order to host out website       |
+| Stakeholder name |            Description            |
+| :--------------: | :-------------------------------: |
+|     Manager      |       Managers of the store       |
+|     Customer     |      Customers of the store       |
+| Payment service  | To offer ways to pay to the users |
 
 # Context Diagram and interfaces
 
