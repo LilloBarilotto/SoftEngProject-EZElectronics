@@ -9,6 +9,7 @@ Version: V1 - description of EZElectronics in CURRENT form (as received by teach
 |      V1.1      | Add stakeholders, context diagram, personas and stories |
 |      V1.2      |                  Add UCD and scenarios                  |
 |      V1.3      |                      Add glossary                       |
+|      V1.4      |                     Add FR and NFR                      |
 
 # Contents
 
@@ -128,26 +129,36 @@ After login, he enters the product details and the price and updates the system.
 
 ## Functional Requirements
 
-\<In the form DO SOMETHING, or VERB NOUN, describe high level capabilities of the system>
-
-\<they match to high level use cases>
-
-|  ID   | Description |
-| :---: | :---------: |
-|  FR1  |             |
-|  FR2  |             |
-| FRx.. |             |
+|  ID   |                 Description                 |
+| :---: | :-----------------------------------------: |
+|  FR1  |             Manage user account             |
+| FR1.1 |         Login, start of the session         |
+| FR1.2 |         Logout, end of the session          |
+| FR1.3 |       Check credentials and user role       |
+| FR1.4 |          Registration of the user           |
+| FR1.5 | Manage errors in case of invalid input data |
+|  FR2  |               Manage products               |
+| FR2.3 |      Registration of the new products       |
+| FR2.3 |       Categorization of the products        |
+|  FR3  |           Managing shopping carts           |
+| FR3.1 |          Add products to the cart           |
+| FR3.2 |          Show products in the cart          |
+| FR3.3 |  Calculate the total price of the products  |
+| FR3.4 |        Payment of the shopping cart         |
+|  FR4  |  Store all previous purchases of the user   |
+| FR4.1 | Register the selling dates of the products  |
 
 ## Non Functional Requirements
 
-\<Describe constraints on functional requirements>
-
-|   ID    | Type (efficiency, reliability, ..) | Description | Refers to |
-| :-----: | :--------------------------------: | :---------: | :-------: |
-|  NFR1   |                                    |             |           |
-|  NFR2   |                                    |             |           |
-|  NFR3   |                                    |             |           |
-| NFRx .. |                                    |             |           |
+|  ID  | Type (efficiency, reliability, ..) |                                      Description                                      |   Refers to   |
+| :--: | :--------------------------------: | :-----------------------------------------------------------------------------------: | :-----------: |
+| NFR1 |             Usability              | Should be used with no training by users including both roles in less than 10 minutes |    ALL FR     |
+| NFR2 |             Efficiency             |                 Response time lower than 100ms in optimal conditions                  |    ALL FR     |
+| NFR3 |            Availability            |                         Available for the 99.999% of the time                         |    ALL FR     |
+| NFR4 |              Security              |                   Only authorized users with credentials can access                   |   FR1, FR2    |
+| NFR5 |           Dependability            |       Previous purchases, products and carts available, consistent and secured        |   FR5. FR3    |
+| NFR6 |            Correctness             |              Total price of cart must match the sum of products' prices               | FR3, FR4, FR5 |
+| NFR7 |            Reliability             |              Less than 4 minor/medium defects per month and no data loss              |    ALL FR     |
 
 # Use case diagram and use cases
 
