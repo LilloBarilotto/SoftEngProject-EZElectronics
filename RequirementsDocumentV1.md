@@ -69,7 +69,6 @@ Version: V1 - description of EZElectronics in CURRENT form (as received by teach
       - [Scenario 12.1](#scenario-121)
       - [Scenario 12.2](#scenario-122)
 - [Glossary](#glossary)
-- [System Design](#system-design)
 - [Deployment Diagram](#deployment-diagram)
 
 # Informal description
@@ -521,12 +520,6 @@ After login, he enters the product details and the price and updates the system.
 
 ![Glossary](uml/glossary.png "Glossary")
 
-# System Design
-
-\<describe here system design>
-
-\<must be consistent with Context diagram>
-
 # Deployment Diagram
 
-\<describe here deployment diagram >
+![Deployment diagram](uml/deploymentDiagram.png "Deployment Diagram")
