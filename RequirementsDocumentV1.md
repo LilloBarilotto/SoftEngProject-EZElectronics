@@ -10,6 +10,7 @@ Version: V1 - description of EZElectronics in CURRENT form (as received by teach
 |      V1.2      |                  Add UCD and scenarios                  |
 |      V1.3      |                      Add glossary                       |
 |      V1.4      |                     Add FR and NFR                      |
+|      V1.5      |                 Add deployment diagram                  |
 
 # Contents
 
