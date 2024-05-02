@@ -4,10 +4,12 @@ Date: 22-04-2024
 
 Version: V1 - description of EZElectronics in FUTURE form (as proposed by the team)
 
-| Version number |               Change                |
-| :------------: | :---------------------------------: |
-|      V1.1      |          Update FR and NFR          |
-|      V1.2      | Add glossary and deployment diagram |
+| Version number |                    Change                     |
+| :------------: | :-------------------------------------------: |
+|      V1.1      | Add stakeholders, context diagram and stories |
+|      V1.2      |               Update FR and NFR               |
+|      V1.3      |      Add glossary and deployment diagram      |
+|      V1.4      |                    Add UCD                    |
 
 # Contents
 
@@ -44,6 +46,7 @@ Version: V1 - description of EZElectronics in FUTURE form (as proposed by the te
       - [Scenario 3.2](#scenario-32)
     - [Get info about the current cart, UC4](#get-info-about-the-current-cart-uc4)
       - [Scenario 4.1](#scenario-41)
+      - [Scenario 4.2](#scenario-42)
     - [Get info about all the products (of a given model or category), UC5](#get-info-about-all-the-products-of-a-given-model-or-category-uc5)
       - [Scenario 5.1](#scenario-51)
       - [Scenario 5.2](#scenario-52)
@@ -69,6 +72,25 @@ Version: V1 - description of EZElectronics in FUTURE form (as proposed by the te
     - [Register the arrival of a new set of products, UC12](#register-the-arrival-of-a-new-set-of-products-uc12)
       - [Scenario 12.1](#scenario-121)
       - [Scenario 12.2](#scenario-122)
+    - [Get products by supplier, UC13](#get-products-by-supplier-uc13)
+      - [Scenario 13.1](#scenario-131)
+      - [Scenario 13.2](#scenario-132)
+    - [Get info about last products, UC14](#get-info-about-last-products-uc14)
+      - [Scenario 14.1](#scenario-141)
+      - [Scenario 14.2](#scenario-142)
+    - [Registration for the fidelity card, UC15](#registration-for-the-fidelity-card-uc15)
+      - [Scenario 15.1](#scenario-151)
+    - [Add a product to the wishlist, UC16](#add-a-product-to-the-wishlist-uc16)
+      - [Scenario 16.1](#scenario-161)
+      - [Scenario 16.2](#scenario-162)
+    - [Get all products in the wishlist, UC17](#get-all-products-in-the-wishlist-uc17)
+      - [Scenario 17.1](#scenario-171)
+    - [Delete all products from the wishlist, UC18](#delete-all-products-from-the-wishlist-uc18)
+      - [Scenario 18.1](#scenario-181)
+      - [Scenario 18.2](#scenario-182)
+    - [Remove a product from the wishlist, UC19](#remove-a-product-from-the-wishlist-uc19)
+      - [Scenario 19.1](#scenario-191)
+      - [Scenario 19.2](#scenario-192)
 - [Glossary](#glossary)
 - [Deployment Diagram](#deployment-diagram)
 
@@ -286,7 +308,7 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 ### Get info about the current cart, UC4
 
 | Actors Involved  |                              Customer                               |
-|:----------------:|:-------------------------------------------------------------------:|
+| :--------------: | :-----------------------------------------------------------------: |
 |   Precondition   |            Customer is logged in and has an active cart             |
 |  Post condition  |         The information about the current cart is displayed         |
 | Nominal Scenario |          Customer gets information about the current cart           |
@@ -305,7 +327,7 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 4.2
 
 |  Scenario 4.2  |            Get info about the current cart (variant)            |
-|:--------------:|:---------------------------------------------------------------:|
+| :------------: | :-------------------------------------------------------------: |
 |  Precondition  | Customer with fidelity card is logged in and has an active cart |
 | Post condition |       The information about the current cart is displayed       |
 |     Step#      |                           Description                           |
@@ -558,11 +580,10 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 |       1        | Manager provides the information about the new set of products |
 |       2        |                   An error page is displayed                   |
 
-
 ### Get products by supplier, UC13
 
 | Actors Involved  |                                     Manager                                     |
-| :--------------: |:-------------------------------------------------------------------------------:|
+| :--------------: | :-----------------------------------------------------------------------------: |
 |   Precondition   |                              Manager is logged in                               |
 |  Post condition  | The information about the products of the supplier are displayed to the Manager |
 | Nominal Scenario |                  Manager gets info about products by supplier                   |
@@ -571,38 +592,36 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 13.1
 
 | Scenario 13.1  |                  Get info about products by supplier (nominal)                  |
-|:--------------:|:-------------------------------------------------------------------------------:|
+| :------------: | :-----------------------------------------------------------------------------: |
 |  Precondition  |                              Manager is logged in                               |
 | Post condition | The information about the products of the supplier are displayed to the Manager |
 |     Step#      |                                   Description                                   |
 |       1        |       Manager requests information about products by a specific supplier        |
-|       2        |    The website displays the information about all products of the supplier      |
+|       2        |     The website displays the information about all products of the supplier     |
 
 #### Scenario 13.2
 
 | Scenario 13.2  |      Get info about products by supplier (exception)       |
-|:--------------:|:----------------------------------------------------------:|
+| :------------: | :--------------------------------------------------------: |
 |  Precondition  |                    Manager is logged in                    |
 | Post condition |           The website displays an error 404 page           |
 |     Step#      |                        Description                         |
 |       1        | Manager requests information about a non existing supplier |
 |       2        |           The website displays an error 404 page           |
 
-
-
 ### Get info about last products, UC14
 
 | Actors Involved  |                      Customer (or Manager)                       |
-| :--------------: |:----------------------------------------------------------------:|
+| :--------------: | :--------------------------------------------------------------: |
 |   Precondition   |                Customer (or Manager) is logged in                |
 |  Post condition  | The information about the last products is displayed to the User |
 | Nominal Scenario |                User gets info about last products                |
-|   Variants     |                      The sold flag is sent                       |
+|     Variants     |                      The sold flag is sent                       |
 
 #### Scenario 14.1
 
 | Scenario 14.1  |        Get info about last products (nominal)        |
-|:--------------:|:----------------------------------------------------:|
+| :------------: | :--------------------------------------------------: |
 |  Precondition  |          Customer (or Manager) is logged in          |
 | Post condition | The information about the last products is displayed |
 |     Step#      |                     Description                      |
@@ -612,28 +631,25 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 14.2
 
 | Scenario 14.2  |                        Get info about last products (variant)                         |
-|:--------------:|:-------------------------------------------------------------------------------------:|
+| :------------: | :-----------------------------------------------------------------------------------: |
 |  Precondition  |                          Customer (or Manager) is logged in                           |
 | Post condition | The information about the last products that have (or haven't) been sold is displayed |
 |     Step#      |                                      Description                                      |
 |       1        |                          User navigates to the correct page                           |
 |       2        | The information about the last products that have (or haven't) been sold is displayed |
 
-
-
 ### Registration for the fidelity card, UC15
 
 | Actors Involved  |                        Customer                        |
-| :--------------: |:------------------------------------------------------:|
+| :--------------: | :----------------------------------------------------: |
 |   Precondition   |                 Customer is logged in                  |
 |  Post condition  |          Customer obtained the fidelity card           |
 | Nominal Scenario | Customer clicks the button to obtain the fidelity card |
 
-
 #### Scenario 15.1
 
 | Scenario 15.1  | Registration for the fidelity card (nominal) |
-|:--------------:|:--------------------------------------------:|
+| :------------: | :------------------------------------------: |
 |  Precondition  |            Customer is logged in             |
 | Post condition |        Customer obtains fidelity card        |
 |     Step#      |                 Description                  |
@@ -641,11 +657,10 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 |       2        |            Obtains fidelity card             |
 |       3        |            The button disappears             |
 
-
 ### Add a product to the wishlist, UC16
 
 | Actors Involved  |               Customer               |
-| :--------------: |:------------------------------------:|
+| :--------------: | :----------------------------------: |
 |   Precondition   |        Customer is logged in         |
 |  Post condition  | The product is added to the wishlist |
 | Nominal Scenario | Customer adds a product the wishlist |
@@ -654,7 +669,7 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 16.1
 
 | Scenario 16.1  |            Add a product to the wishlist (nominal)             |
-|:--------------:|:--------------------------------------------------------------:|
+| :------------: | :------------------------------------------------------------: |
 |  Precondition  |                     Customer is logged in                      |
 | Post condition |              The product is added to the wishlist              |
 |     Step#      |                          Description                           |
@@ -664,18 +679,17 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 16.2
 
 | Scenario 16.2  |           Add a product to the wishlist (exception)            |
-|:--------------:|:--------------------------------------------------------------:|
+| :------------: | :------------------------------------------------------------: |
 |  Precondition  |                     Customer is logged in                      |
 | Post condition |             The website displays an error 404 page             |
 |     Step#      |                          Description                           |
 |       1        | Customer clicks on the button to add a product to the wishlist |
 |       2        |             The website displays an error 404 page             |
 
-
 ### Get all products in the wishlist, UC17
 
 | Actors Involved  |                    Customer                     |
-|:----------------:|:-----------------------------------------------:|
+| :--------------: | :---------------------------------------------: |
 |   Precondition   |    Customer is logged in and has a wishlist     |
 |  Post condition  | The information about the wishlist is displayed |
 | Nominal Scenario |  Customer gets information about the wishlist   |
@@ -683,37 +697,36 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 17.1
 
 | Scenario 17.1  |           Get all products in the wishlist (nominal)            |
-|:--------------:|:---------------------------------------------------------------:|
+| :------------: | :-------------------------------------------------------------: |
 |  Precondition  |            Customer is logged in and has a wishlist             |
 | Post condition |         The information about the wishlist is displayed         |
 |     Step#      |                           Description                           |
 |       1        |             Customer navigates to the wishlist page             |
 |       2        | The information about all products in the wishlist is displayed |
 
-
 ### Delete all products from the wishlist, UC18
 
-| Actors Involved  |                          Customer                          |
-|:----------------:|:----------------------------------------------------------:|
-|   Precondition   |          Customer is logged in and has a wishlist          |
-|  Post condition  |                   The wishlist is empty                    |
-| Nominal Scenario |       Customer deletes all products in the wishlist        |
-|     Variant      |           Customer does not have a full wishlist           |
+| Actors Involved  |                   Customer                    |
+| :--------------: | :-------------------------------------------: |
+|   Precondition   |   Customer is logged in and has a wishlist    |
+|  Post condition  |             The wishlist is empty             |
+| Nominal Scenario | Customer deletes all products in the wishlist |
+|     Variant      |    Customer does not have a full wishlist     |
 
 #### Scenario 18.1
 
-| Scenario 18.1  |      Delete all products from the wishlist (nominal)       |
-|:--------------:|:----------------------------------------------------------:|
-|  Precondition  |          Customer is logged in and has a wishlist          |
-| Post condition |                   The wishlist is empty                    |
-|     Step#      |                        Description                         |
-|       1        |       Customer clicks on delete all products button        |
-|       2        |                All the products are deleted                |
+| Scenario 18.1  | Delete all products from the wishlist (nominal) |
+| :------------: | :---------------------------------------------: |
+|  Precondition  |    Customer is logged in and has a wishlist     |
+| Post condition |              The wishlist is empty              |
+|     Step#      |                   Description                   |
+|       1        |  Customer clicks on delete all products button  |
+|       2        |          All the products are deleted           |
 
 #### Scenario 18.2
 
 | Scenario 18.2  |                     Delete all products from the wishlist (variant)                      |
-|:--------------:|:----------------------------------------------------------------------------------------:|
+| :------------: | :--------------------------------------------------------------------------------------: |
 |  Precondition  |                         Customer is logged in and has a wishlist                         |
 | Post condition |                              The website displays a message                              |
 |     Step#      |                                       Description                                        |
@@ -723,7 +736,7 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 ### Remove a product from the wishlist, UC19
 
 | Actors Involved  |                            Customer                            |
-| :--------------: |:--------------------------------------------------------------:|
+| :--------------: | :------------------------------------------------------------: |
 |   Precondition   |            Customer is logged in and has a wishlist            |
 |  Post condition  |            The product is deleted from the wishlist            |
 | Nominal Scenario |          Customer removes a product from the wishlist          |
@@ -732,7 +745,7 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 19.1
 
 | Scenario 19.1  |            Remove a product from the wishlist (nominal)             |
-|:--------------:|:-------------------------------------------------------------------:|
+| :------------: | :-----------------------------------------------------------------: |
 |  Precondition  |              Customer is logged in and has a wishlist               |
 | Post condition |              The product is removed from the wishlist               |
 |     Step#      |                             Description                             |
@@ -742,14 +755,12 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 #### Scenario 19.2
 
 | Scenario 19.2  |           Remove a product from the wishlist (exception)            |
-|:--------------:|:-------------------------------------------------------------------:|
+| :------------: | :-----------------------------------------------------------------: |
 |  Precondition  |              Customer is logged in and has a wishlist               |
 | Post condition |               The website displays an error 404 page                |
 |     Step#      |                             Description                             |
 |       1        | Customer clicks on the button to remove a product from the wishlist |
 |       2        |               The website displays an error 404 page                |
-
-
 
 # Glossary
 
