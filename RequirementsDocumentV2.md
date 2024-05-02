@@ -302,7 +302,7 @@ He discovers that with the Fidelity Card he can get 10% off on all the products 
 |  Precondition  | Customer is logged in but does not have an active cart |
 | Post condition |         The website displays an error 404 page         |
 |     Step#      |                      Description                       |
-|       1        |         Customer clicks on delete cart button          |
+|       1        |             Customer tries to delete cart              |
 |       2        |         The website displays an error 404 page         |
 
 ### Get info about the current cart, UC4
