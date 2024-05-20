@@ -1,9 +1,10 @@
 import express, { Router } from "express"
 import ErrorHandler from "../helper"
-import { body, param, query } from "express-validator"
+import { body } from "express-validator"
 import ProductController from "../controllers/productController"
 import Authenticator from "./auth"
-import { Product } from "../components/product"
+import dayjs from "dayjs";
+import {DateError} from "../utilities";
 
 /**
  * Represents a class that defines the routes for handling proposals.
@@ -36,11 +37,11 @@ class ProductRoutes {
 
     /**
      * Initializes the routes for the product router.
-     * 
+     *
      * @remarks
      * This method sets up the HTTP routes for handling product-related operations such as registering products, registering arrivals, selling products, retrieving products, and deleting products.
      * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
-     * 
+     *
      */
     initRoutes() {
 
@@ -58,6 +59,18 @@ class ProductRoutes {
          */
         this.router.post(
             "/",
+            (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
+            body("model").isString().notEmpty(),
+            body("category").isString().isIn(["Smartphone", "Laptop", "Appliance"]),
+            body("quantity").isInt({min: 1}),
+            body("details").isString().optional(),
+            body("sellingPrice").isFloat({min: 0.01}),
+            body("arrivalDate").custom((date, {req}) => {
+                if (date === undefined || date === "") return true;
+                if (dayjs().isBefore(date, "day")) throw new DateError();
+                else return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.registerProducts(req.body.model, req.body.category, req.body.quantity, req.body.details, req.body.sellingPrice, req.body.arrivalDate)
                 .then(() => res.status(200).end())
                 .catch((err) => next(err))
@@ -75,7 +88,7 @@ class ProductRoutes {
         this.router.patch(
             "/:model",
             (req: any, res: any, next: any) => this.controller.changeProductQuantity(req.params.model, req.body.quantity, req.body.changeDate)
-                .then((quantity: any /**number */) => res.status(200).json({ quantity: quantity }))
+                .then((quantity: any /**number */) => res.status(200).json({quantity: quantity}))
                 .catch((err) => next(err))
         )
 
@@ -91,7 +104,7 @@ class ProductRoutes {
         this.router.patch(
             "/:model/sell",
             (req: any, res: any, next: any) => this.controller.sellProduct(req.params.model, req.body.quantity, req.body.sellingDate)
-                .then((quantity: any /**number */) => res.status(200).json({ quantity: quantity }))
+                .then((quantity: any /**number */) => res.status(200).json({quantity: quantity}))
                 .catch((err) => {
                     console.log(err)
                     next(err)
