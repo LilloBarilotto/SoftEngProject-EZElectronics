@@ -70,8 +70,9 @@ class UserRoutes {
          */
         this.router.get(
             "/",
+            (req: any, res: any, next: any) => this.authService.isAdmin(req, res, next),
             (req: any, res: any, next: any) => this.controller.getUsers()
-                .then((users: any /**User[] */) => res.status(200).json(users))
+                .then((users: User[]) => res.status(200).json(users))
                 .catch((err) => next(err))
         )
 
