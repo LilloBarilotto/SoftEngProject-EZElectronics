@@ -174,6 +174,25 @@ class ProductDAO {
             }
         })
     }
+
+    /**
+     * Decrement the quantity of a product in the database.
+     * @param model
+     * @param quantity
+     */
+    sellProduct(model: string, quantity: number): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                const sql = "UPDATE products SET quantity = quantity - ? WHERE model = ?"
+                db.run(sql, [quantity, model], (err: Error | null) => {
+                    if (err) reject(err)
+                    resolve(true)
+                })
+            } catch (error) {
+                reject(error)
+            }
+        });
+    }
 }
 
 export default ProductDAO
