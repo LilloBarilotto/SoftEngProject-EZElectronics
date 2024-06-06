@@ -100,6 +100,29 @@ describe("POST /ezelectronics/products", () => {
     })
 });
 
+describe("DELETE /products", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    test("should return a 401 status code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not an admin nor a manager", status: 401 }))
+        jest.spyOn(ProductController.prototype, "deleteAllProducts").mockResolvedValueOnce(true)
+        const response = await request(app).delete(baseURL + "/products")
+        expect(response.status).toBe(401)
+        expect(ProductController.prototype.deleteAllProducts).toHaveBeenCalledTimes(0)
+    })
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(ProductController.prototype, "deleteAllProducts").mockResolvedValueOnce(true)
+        const response = await request(app).delete(baseURL + "/products")
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.deleteAllProducts).toHaveBeenCalledTimes(1)
+    })
+});
+
 describe("PATCH /ezelectronics/products/:model", () => {
     afterEach(() => {
         jest.restoreAllMocks();

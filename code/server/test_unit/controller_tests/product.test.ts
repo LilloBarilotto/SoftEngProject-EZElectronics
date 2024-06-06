@@ -40,6 +40,22 @@ describe("registerProducts", () => {
         expect(ProductDAO.prototype.createProduct).toHaveBeenCalledWith(testProduct);
         expect(response).toBe(true);
     });
+})
+
+describe("deleteAllProducts", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.clearAllMocks();
+    });
+
+    test("should return true", async () => {
+        jest.spyOn(ProductDAO.prototype, "deleteAllProducts").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        const response = await controller.deleteAllProducts();
+
+        expect(ProductDAO.prototype.deleteAllProducts).toHaveBeenCalledTimes(1);
+        expect(response).toBe(true);
+    });
 });
 
 describe("changeProductQuantity", () => {

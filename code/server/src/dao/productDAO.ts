@@ -29,6 +29,26 @@ class ProductDAO {
         })
     }
 
+    /**
+     * Delete all the products from the database.
+     * @returns A promise that resolves to true if the products have been deleted.
+     */
+    deleteAllProducts(): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                const sql = "DELETE FROM products";
+                db.run(sql, (err: Error | null) => {
+                    if (err) {
+                        reject(err)
+                    }
+                    resolve(true)
+                })
+            } catch (error) {
+                reject(error)
+            }
+        })
+    }
+
     updateProduct(model: String, quantity: number, changeDate: String): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             try {
