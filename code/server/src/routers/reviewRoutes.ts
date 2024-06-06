@@ -3,7 +3,7 @@ import ErrorHandler from "../helper"
 import { body, param, query } from "express-validator"
 import ReviewController from "../controllers/reviewController"
 import Authenticator from "./auth"
-import { ProductReview } from "../components/review"
+import {ProductReview} from "../components/review";
 
 class ReviewRoutes {
     private controller: ReviewController
@@ -36,6 +36,10 @@ class ReviewRoutes {
          */
         this.router.post(
             "/:model",
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            body("score").isInt({min: 1, max: 5}),
+            body("comment").isString().notEmpty({ignore_whitespace: true}),
+            (req, res, next) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.addReview(req.params.model, req.user, req.body.score, req.body.comment)
                 .then(() => res.status(200).send())
                 .catch((err: Error) => {

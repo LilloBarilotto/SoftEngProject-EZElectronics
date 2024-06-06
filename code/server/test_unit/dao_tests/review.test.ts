@@ -1,8 +1,11 @@
-import db from "../../src/db/db";
 import {ProductReview} from "../../src/components/review";
+import {expect, jest, test} from "@jest/globals"
+
+import db from "../../src/db/db"
 import {Database} from "sqlite3"
 import ReviewDAO from "../../src/dao/reviewDAO";
 import {Role} from "../../src/components/user";
+import * as MockDate from "mockdate";
 
 jest.mock("../../src/db/db.ts");
 
@@ -82,6 +85,7 @@ describe("deleteByUser", () => {
 describe('deleteAll', () => {
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.resetAllMocks();
     });
 
     test("should resolve the number of deleted rows", async () => {
@@ -97,5 +101,29 @@ describe('deleteAll', () => {
         expect(mockDb).toHaveBeenCalledTimes(1);
         expect(mockDb).toHaveBeenCalledWith("DELETE FROM reviews", expect.any(Function));
     })
-
 });
+
+describe ('create review', ()=>{
+    afterEach(() => {
+        jest.restoreAllMocks();
+        MockDate.reset();
+        jest.resetAllMocks();
+    });
+
+    test("resolve true if review is inserted", async () => {
+        const mockDb = jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
+            // changes.call represent the function context, the first param is the object `this`
+            callback.call({changes: 1}, null);
+            return {} as Database;
+        });
+        const date = "2024-05-23";
+        MockDate.set(date);
+        const review = new ProductReview("iPhone 13 Pro Max", "Mario Rossi", 4, date, "test");
+        const reviewDAO = new ReviewDAO();
+        const result = await reviewDAO.create(review);
+
+        expect(result).toBe(true);
+        expect(mockDb).toHaveBeenCalledTimes(1);
+        expect(mockDb).toHaveBeenCalledWith("INSERT INTO reviews (model, user, score, date, comment) VALUES (?, ?, ?, ?, ?)", ["iPhone 13 Pro Max", "Mario Rossi", 4, date, "test"], expect.any(Function));
+    })
+})

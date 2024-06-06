@@ -2,8 +2,9 @@ import { User } from "../components/user";
 import ReviewDAO from "../dao/reviewDAO";
 import ProductDAO from "../dao/productDAO";
 import {ProductNotFoundError} from "../errors/productError";
-import {NoReviewProductError} from "../errors/reviewError";
+import {NoReviewProductError, ExistingReviewError} from "../errors/reviewError";
 import {ProductReview} from "../components/review";
+import dayjs from "dayjs";
 
 class ReviewController {
     private reviewDAO: ReviewDAO
@@ -22,7 +23,21 @@ class ReviewController {
      * @param comment The comment made by the user
      * @returns A Promise that resolves to nothing
      */
-    async addReview(model: string, user: User, score: number, comment: string) /**:Promise<void> */ { }
+    async addReview(model: string, user: User, score: number, comment: string):Promise<void>  {
+
+        // if the model does not exist an error is thrown
+        if(!await this.productDAO.existsByModel(model)) {
+           throw new ProductNotFoundError();
+        }
+
+        // create a review object
+        const review = new ProductReview(model, user.username, score, dayjs().format("YYYY-MM-DD"), comment );
+
+        // if a new entry for the reviews table is not created an error is thrown
+        if(!await this.reviewDAO.create(review)) {
+           throw new ExistingReviewError();
+        }
+    }
 
     /**
      * Returns all reviews for a product
