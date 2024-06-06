@@ -188,3 +188,68 @@ describe("PATCH /ezelectronics/products/:model", () => {
         );
     });
 });
+
+describe("GET /ezelectronics/products", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    test("should return a 401 status code if not admin nor manager", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not an admin nor a manager", status: 401 }))
+        jest.spyOn(ProductController.prototype, "getProducts").mockResolvedValueOnce([])
+        const response = await request(app).get(baseURL + "/products")
+        expect(response.status).toBe(401)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledTimes(0)
+    });
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(ProductController.prototype, "getProducts").mockResolvedValueOnce([])
+        const response = await request(app).get(baseURL + "/products")
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledWith(undefined, undefined, undefined)
+    });
+
+    test("should return a 200 success code with a category filter", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(ProductController.prototype, "getProducts").mockResolvedValueOnce([])
+        const response = await request(app).get(baseURL + "/products").query({grouping: "category", category: "Smartphone"})
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledWith("category", "Smartphone", undefined)
+    });
+
+    test("should return a 200 success code with a model filter", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(ProductController.prototype, "getProducts").mockResolvedValueOnce([])
+        const response = await request(app).get(baseURL + "/products").query({grouping: "model", model: "iPhone 13 Pro Max"})
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledWith("model", undefined, "iPhone 13 Pro Max")
+    });
+
+    test("should return a 404 response code if ProductNotFoundError is thrown", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(ProductController.prototype, "getProducts").mockRejectedValue(new ProductNotFoundError)
+        const response = await request(app).get(baseURL + "/products").query({grouping: "model", model: "iPhone 13 Pro Max"})
+        expect(response.status).toBe(404)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledWith("model", undefined, "iPhone 13 Pro Max")
+    });
+
+    it.each([
+        {grouping: undefined, model: "model", category: "category"},
+        {grouping: "model", model: "model", category: "category"},
+        {grouping: "model", model: undefined, category: undefined},
+        {grouping: "category", model: "model", category: "category"},
+        {grouping: "category", model: undefined, category: undefined}
+    ])("return a 422 response code if %s is sent", async (fields) => {
+        jest.spyOn(ProductController.prototype, "getProducts").mockResolvedValueOnce([])
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).get(baseURL + "/products").query({grouping: fields.grouping, model: fields.model, category: fields.category})
+        expect(response.status).toBe(422)
+        expect(ProductController.prototype.getProducts).toHaveBeenCalledTimes(0)
+    });
+});

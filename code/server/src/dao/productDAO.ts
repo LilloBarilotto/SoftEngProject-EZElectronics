@@ -30,6 +30,35 @@ class ProductDAO {
     }
 
     /**
+     * Return all products in the database, with the option to filter them by category or model.
+     * @param filterBy
+     * @param filterValue
+     * @returns A promise that resolves to an array of Products.
+     */
+    getProducts(filterBy: string | null, filterValue: string | null): Promise<Product[]> {
+        return new Promise<Product[]>((resolve, reject) => {
+            try {
+                let sql = "SELECT model, selling_price AS sellingPrice, category, arrival_date as arrivalDate, details, quantity FROM products";
+                let params = [];
+
+                // Also check if filterBy is a valid filter to avoid SQL injection
+                if (filterBy && ["category", "model"].includes(filterBy)) {
+                    sql += ` WHERE ${filterBy} = ?;`;
+                    params.push(filterValue);
+                }
+
+                db.all(sql, params, (err: Error | null, rows: Product[]) => {
+                    if (err) reject(err);
+                    const products: Product[] = rows.map(row => new Product(row.sellingPrice, row.model, row.category, row.arrivalDate, row.details, row.quantity));
+                    resolve(products);
+                })
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    /**
      * Delete all the products from the database.
      * @returns A promise that resolves to true if the products have been deleted.
      */

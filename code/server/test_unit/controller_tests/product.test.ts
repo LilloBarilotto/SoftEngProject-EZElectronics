@@ -14,7 +14,8 @@ jest.mock("../../src/dao/productDAO")
 
 describe("registerProducts", () => {
     afterEach(() => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
     });
 
     const testProduct = new Product(
@@ -122,5 +123,80 @@ describe("changeProductQuantity", () => {
             wrongDate)).rejects.toThrow(ChangeDateBeforeArrivalDateError);
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
         expect(ProductDAO.prototype.updateProduct).toHaveBeenCalledTimes(0);
+    });
+});
+
+describe("getProducts", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    const testProducts = [
+        {
+            model: "iPhone 13 Pro Max",
+            sellingPrice: 100.50,
+            category: Category.SMARTPHONE,
+            arrivalDate: "2024-05-19",
+            details: "best phone",
+            quantity: 55
+        },
+        {
+            model: "Banana phone",
+            sellingPrice: 320,
+            category: Category.SMARTPHONE,
+            arrivalDate: "2024-03-17",
+            details: "worst phone",
+            quantity: 430
+        }
+    ];
+
+    test("should return an array of products", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProducts").mockResolvedValueOnce(testProducts);
+        const controller = new ProductController();
+        const response = await controller.getProducts(null, null, null);
+
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledWith(null, null);
+        expect(response).toEqual(testProducts);
+    });
+
+    test("should filter by category", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProducts").mockResolvedValueOnce(testProducts);
+        const controller = new ProductController();
+        const response = await controller.getProducts("category", Category.SMARTPHONE, null);
+
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledWith("category", Category.SMARTPHONE);
+        expect(response).toEqual(testProducts);
+    });
+
+    test("should filter by model", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProducts").mockResolvedValueOnce(testProducts);
+        const controller = new ProductController();
+        const response = await controller.getProducts("model", testProducts[0].model, null);
+
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledWith("model", testProducts[0].model);
+        expect(response).toEqual(testProducts);
+    });
+
+    test("should return an empty array", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProducts").mockResolvedValueOnce([]);
+        const controller = new ProductController();
+        const response = await controller.getProducts(null, null, null);
+
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledWith(null, null);
+        expect(response).toEqual([]);
+    });
+
+    test("should throw ProductNotFoundError", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProducts").mockResolvedValueOnce([]);
+        const controller = new ProductController();
+
+        await expect(controller.getProducts("model", null, testProducts[0].model)).rejects.toThrow(ProductNotFoundError);
+
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProducts).toHaveBeenCalledWith("model", testProducts[0].model);
     });
 });
