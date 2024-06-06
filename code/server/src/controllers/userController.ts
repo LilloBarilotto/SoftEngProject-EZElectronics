@@ -1,6 +1,8 @@
 import {User} from "../components/user"
 import UserDAO from "../dao/userDAO"
 
+import {UnauthorizedUserError} from "../errors/userError";
+
 /**
  * Represents a controller for managing users.
  * All methods of this class must interact with the corresponding DAO class to retrieve or store data.
@@ -45,10 +47,17 @@ class UserController {
      * The function has different behavior depending on the role of the user calling it:
      * - Admins can retrieve any user
      * - Other roles can only retrieve their own information
+     * @param user
      * @param username - The username of the user to retrieve. The user must exist.
      * @returns A Promise that resolves to the user with the specified username.
      */
-    async getUserByUsername(user: User, username: string) /**:Promise<User> */ { }
+    async getUserByUsername(user: User, username: string) :Promise<User> {
+        if (user.role !== "Admin" && user.username !== username) {
+            throw new UnauthorizedUserError();
+        }
+
+        return this.dao.getUserByUsername(username)
+    }
 
     /**
      * Deletes a specific user
