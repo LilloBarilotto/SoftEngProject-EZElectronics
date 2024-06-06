@@ -222,6 +222,7 @@ class ProductRoutes {
          */
         this.router.delete(
             "/:model",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             (req: any, res: any, next: any) => this.controller.deleteProduct(req.params.model)
                 .then(() => res.status(200).end())
                 .catch((err: any) => next(err))

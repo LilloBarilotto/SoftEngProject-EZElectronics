@@ -205,3 +205,21 @@ describe("getAvailableProducts", () => {
         expect(mockDB).toHaveBeenCalledWith("SELECT model, selling_price AS sellingPrice, category, arrival_date as arrivalDate, details, quantity FROM products WHERE quantity > 0 AND model = ?;", [testProducts[0].model], expect.any(Function));
     })
 });
+
+describe("deleteProduct", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("resolves true if product is deleted", async () => {
+        const mockDB = jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
+            callback(null)
+            return {} as Database
+        });
+        const productDAO = new ProductDAO();
+        const result = await productDAO.deleteProduct("iphone13")
+        expect(result).toBe(true)
+        expect(mockDB).toHaveBeenCalledTimes(1);
+        expect(mockDB).toHaveBeenCalledWith("DELETE FROM products WHERE model = ?", ["iphone13"], expect.any(Function))
+    });
+});

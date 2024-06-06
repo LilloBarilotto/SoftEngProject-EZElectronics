@@ -318,3 +318,34 @@ describe("GET /ezelectronics/products/available", () => {
     });
 });
 
+
+describe("DELETE /ezelectronics/products/:model", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(ProductController.prototype, "deleteProduct").mockResolvedValueOnce(true)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).delete(baseURL + "/products/iphone13").send()
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.deleteProduct).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.deleteProduct).toHaveBeenCalledWith("iphone13")
+    });
+
+    test("should return a 401 response code if user is not a manager nor an admin", async () => {
+        jest.spyOn(ProductController.prototype, "deleteProduct").mockResolvedValueOnce(true)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a manager nor an admin", status: 401 }))
+        const response = await request(app).delete(baseURL + "/products/iphone13").send()
+        expect(response.status).toBe(401)
+        expect(ProductController.prototype.deleteProduct).toHaveBeenCalledTimes(0)
+    });
+
+    test("should return a 404 response code if the product does not exist", async () => {
+        jest.spyOn(ProductController.prototype, "deleteProduct").mockRejectedValue(new ProductNotFoundError)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).delete(baseURL + "/products/iphone13").send()
+        expect(response.status).toBe(404)
+        expect(ProductController.prototype.deleteProduct).toHaveBeenCalledTimes(1)
+    });
+});

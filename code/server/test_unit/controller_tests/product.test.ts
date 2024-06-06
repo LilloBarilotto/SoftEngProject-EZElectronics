@@ -276,3 +276,38 @@ describe("getAvailableProducts", () => {
         expect(ProductDAO.prototype.getAvailableProducts).toHaveBeenCalledWith("model", testProducts[0].model);
     });
 });
+
+describe("deleteProduct", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    const testProduct = new Product(
+        100.50,
+        "iPhone 13 Pro Max",
+        Category.SMARTPHONE,
+        "2024-05-19",
+        "details",
+        55);
+
+    test("should return true", async () => {
+        jest.spyOn(ProductDAO.prototype, "deleteProduct").mockResolvedValueOnce(true);
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProduct);
+
+        const controller = new ProductController();
+        const response = await controller.deleteProduct(testProduct.model);
+
+        expect(ProductDAO.prototype.deleteProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.deleteProduct).toHaveBeenCalledWith(testProduct.model);
+        expect(response).toBe(true);
+    });
+
+    test("should throw ProductNotFoundError", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(undefined);
+
+        const controller = new ProductController();
+        await expect(controller.deleteProduct(testProduct.model)).rejects.toThrow(ProductNotFoundError);
+
+        expect(ProductDAO.prototype.deleteProduct).toHaveBeenCalledTimes(0);
+    });
+});
