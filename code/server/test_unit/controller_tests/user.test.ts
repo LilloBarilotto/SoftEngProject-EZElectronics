@@ -1,7 +1,8 @@
-import {afterEach, expect, jest, test} from "@jest/globals"
+import { test, expect, jest , afterEach, describe} from "@jest/globals"
 import UserController from "../../src/controllers/userController"
 import UserDAO from "../../src/dao/userDAO"
 import {Role, User} from "../../src/components/user";
+import {UnauthorizedUserError} from "../../src/errors/userError";
 
 jest.mock("../../src/dao/userDAO")
 
@@ -41,6 +42,8 @@ describe("getUsers", () => {
     ]
 
     afterEach(() => {
+        jest.clearAllMocks();
+        jest.resetAllMocks();
         jest.restoreAllMocks();
     });
 
@@ -57,4 +60,62 @@ describe("getUsers", () => {
         expect(UserDAO.prototype.getUsers).toHaveBeenCalledTimes(1);
         expect(response).toEqual(userList); //Check if the response is equal to the list of users
     });
+});
+
+describe("getUserByUsername", () => {
+    const userList : User[] = [
+        new User("username1", "name1", "surname1", Role.ADMIN, "", ""),
+        new User("username2", "name2", "surname2", Role.MANAGER, "", ""),
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", "")
+    ]
+
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("Should return the user with the given username", async () => {    // Request by itself Ok
+        const controller = new UserController();
+
+        const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[2]); //Mock the getUserByUsername method of the DAO
+        const response = await controller.getUserByUsername(userList[2], "username3"); //Call the getUserByUsername method of the controller
+
+        expect(MockGetUserByUsername).toHaveBeenCalledTimes(1);
+        expect(MockGetUserByUsername).toHaveBeenCalledWith("username3");
+        expect(response).toBe(userList[2]);
+
+    });
+
+    test("Should return the user with the given username", async () => {        // Request by Admin Ok
+        const controller = new UserController();
+
+        const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[2]); //Mock the getUserByUsername method of the DAO
+        const response = await controller.getUserByUsername(userList[0], userList[2].username); //Call the getUserByUsername method of the controller
+
+        expect(MockGetUserByUsername).toHaveBeenCalledTimes(1);
+        expect(MockGetUserByUsername).toHaveBeenCalledWith(userList[2].username);
+        expect(response).toBe(userList[2]);
+
+    });
+
+    test("Should return UnauthorizedUserError", async () => { //  Request by Customer about other user info
+        const controller = new UserController();
+
+        const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the DAO
+        const response = controller.getUserByUsername(userList[2], "username1"); //Call the getUserByUsername method of the controller
+
+        expect(response).rejects.toThrow(UnauthorizedUserError);
+        expect(MockGetUserByUsername).toHaveBeenCalledTimes(0);
+    });
+
+    test("Should return UnauthorizedUserError", async () => { //  Request by Manager about other user info
+        const controller = new UserController();
+
+        const MockGetUserByUsername =jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the DAO
+        const response = controller.getUserByUsername(userList[1], "username1"); //Call the getUserByUsername method of the controller
+
+        expect(response).rejects.toThrow(UnauthorizedUserError);
+        expect(MockGetUserByUsername).toHaveBeenCalledTimes(0);
+    });
+
 });

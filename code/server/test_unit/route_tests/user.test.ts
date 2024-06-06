@@ -1,10 +1,12 @@
-import {afterEach, expect, jest, test} from "@jest/globals"
+import { test, expect, jest , afterEach, describe} from "@jest/globals"
 import request from 'supertest'
-import {app} from "../../index"
+import { app } from "../../index"
 
 import UserController from "../../src/controllers/userController"
-import {Role, User} from "../../src/components/user"
+
+import { User, Role } from "../../src/components/user"
 import Authenticator from "../../src/routers/auth"
+import {UserNotFoundError} from "../../src/errors/userError"
 
 const baseURL = "/ezelectronics"
 
@@ -107,3 +109,50 @@ describe("GET /sessions/current", () => {
         expect(response.status).toBe(401);
     })
 })
+
+describe("GET /ezelectronics/users/:username", () => {
+    const userList : User[] = [
+        new User("username1", "name1", "surname1", Role.ADMIN, "", ""),
+        new User("username2", "name2", "surname2", Role.MANAGER, "", ""),
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", "")
+    ]
+
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(UserController.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the controller
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) => next());
+
+        const response = await request(app).get(baseURL + "/users/username1"); //Send a GET request to the route
+
+        expect(response.status).toBe(200); //Check if the response status is 200
+        expect(UserController.prototype.getUserByUsername).toHaveBeenCalledTimes(1); //Check if the getUserByUsername method has been called once
+        expect(response.body).toEqual(userList[0]);
+    })
+
+    test("should return a 401 unauthorized code if not LoggedIn", async () => {
+        jest.spyOn(UserController.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the controller
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) => res.status(401).json({ error: "Unauthenticated user", status: 401 }));
+
+        const response = await request(app).get(baseURL + "/users/username1"); //Send a GET request to the route
+
+        expect(response.status).toBe(401); //Check if the response status is 401
+        expect(UserController.prototype.getUserByUsername).toHaveBeenCalledTimes(0); //Check if the getUserByUsername method has not been called
+        expect(response.body).toEqual({ error: "Unauthenticated user", status: 401 });
+    });
+
+    test("should return a 404 if user does not exist", async () => {
+        jest.spyOn(UserController.prototype, "getUserByUsername").mockRejectedValueOnce(new UserNotFoundError);
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) => next());
+
+        const response = await request(app).get(baseURL + "/users/username4"); //Send a GET request to the route
+
+        expect(response.status).toBe(404); //Check if the response status is 404
+        expect(UserController.prototype.getUserByUsername).toHaveBeenCalledTimes(1); //Check if the getUserByUsername method has been called once
+        expect(response.body).toEqual({ error: "The user does not exist", status: 404 });
+    });
+
+});

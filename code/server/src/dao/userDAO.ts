@@ -85,11 +85,9 @@ class UserDAO {
                 db.get(sql, [username], (err: Error | null, row: any) => {
                     if (err) {
                         reject(err)
-                        return
                     }
                     if (!row) {
-                        reject(new UserNotFoundError())
-                        return
+                        reject( new UserNotFoundError)
                     }
                     const user: User = new User(row.username, row.name, row.surname, row.role, row.address, row.birthdate)
                     resolve(user)

@@ -1,7 +1,7 @@
-import express, {Router} from "express"
+import express, { Router } from "express"
 import Authenticator from "./auth"
-import {body} from "express-validator"
-import {User} from "../components/user"
+import { body, param } from "express-validator"
+import { User } from "../components/user"
 import ErrorHandler from "../helper"
 import UserController from "../controllers/userController"
 
@@ -97,8 +97,11 @@ class UserRoutes {
          */
         this.router.get(
             "/:username",
+            (req: any, res: any, next: any) => this.authService.isLoggedIn(req, res, next),
+            param("username").isString().notEmpty(),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.getUserByUsername(req.user, req.params.username)
-                .then((user: any /**User */) => res.status(200).json(user))
+                .then((user: User ) => res.status(200).json(user))
                 .catch((err) => next(err))
         )
 
