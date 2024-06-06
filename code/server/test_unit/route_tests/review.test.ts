@@ -130,3 +130,27 @@ describe("DELETE ezelectronics/reviews/:model", () => {
         expect(ReviewController.prototype.deleteReview).toHaveBeenCalledWith("model", testUser);
     })
 })
+
+describe("DELETE ezelectronics/reviews", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should return a 401 response code if user is not a manage nor an admin", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req, res, next) =>  res.status(401).json({ error: "User is not an admin or manager", status: 401 }));
+
+        const response = await request(app).delete(baseURL).send();
+
+        expect(response.status).toBe(401);
+    })
+
+    test("should return 200 success code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req, res, next) => next());
+        jest.spyOn(ReviewController.prototype, "deleteAllReviews").mockResolvedValueOnce();
+
+        const response = await request(app).delete(baseURL).send();
+
+        expect(response.status).toBe(200);
+    })
+
+})

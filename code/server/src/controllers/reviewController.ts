@@ -70,7 +70,9 @@ class ReviewController {
      * Deletes all reviews of all products
      * @returns A Promise that resolves to nothing
      */
-    async deleteAllReviews() /**:Promise<void> */ { }
+    async deleteAllReviews():Promise<void>  {
+        await this.reviewDAO.deleteAll();
+    }
 }
 
 export default ReviewController;

@@ -78,3 +78,24 @@ describe("deleteByUser", () => {
         expect(mockDb).toHaveBeenCalledWith("DELETE FROM reviews WHERE model = ? AND user = ?", [testModel, testUser.username], expect.any(Function));
     })
 })
+
+describe('deleteAll', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should resolve the number of deleted rows", async () => {
+        const mockDb = jest.spyOn(db, "run").mockImplementation((sql, callback) => {
+            callback.call({changes: 5}, null);
+            return {} as Database;
+        });
+
+        const reviewDAO = new ReviewDAO();
+
+        const response = await reviewDAO.deleteAll();
+        expect(response).toBe(5);
+        expect(mockDb).toHaveBeenCalledTimes(1);
+        expect(mockDb).toHaveBeenCalledWith("DELETE FROM reviews", expect.any(Function));
+    })
+
+});
