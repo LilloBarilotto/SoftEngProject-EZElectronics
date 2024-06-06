@@ -35,6 +35,32 @@ describe("createProduct", () => {
     })
 });
 
+describe("updateProduct", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("resolves true if product is updated", async () => {
+        jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
+            callback(null);
+            return {} as Database;
+        });
+        const productDAO = new ProductDAO();
+        const result = await productDAO.updateProduct("model", 10, "2024-05-29");
+        expect(result).toBe(true);
+    });
+
+    test("throws exception if DB error", async () => {
+        const DB_ERROR_MESSAGE = "This is a DB exception!";
+        jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
+            callback(new Error(DB_ERROR_MESSAGE));
+            return {} as Database;
+        });
+        const productDAO = new ProductDAO();
+        await expect(productDAO.updateProduct("model", 10, "2024-05-29")).rejects.toThrow(DB_ERROR_MESSAGE);
+    });
+});
+
 
 
 

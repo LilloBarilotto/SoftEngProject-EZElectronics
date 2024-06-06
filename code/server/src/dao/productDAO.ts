@@ -29,6 +29,38 @@ class ProductDAO {
         })
     }
 
+    updateProduct(model: String, quantity: number, changeDate: String): Promise<boolean> {
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                const sql = "UPDATE products SET quantity = quantity + ?, arrival_date = ? WHERE model = ?";
+                db.run(sql, [quantity, changeDate, model], (err: Error | null) => {
+                    if (err) {
+                        reject(err)
+                    }
+                    resolve(true)
+                })
+            } catch (error) {
+                reject(error)
+            }
+        });
+    }
+
+    getProduct(model: String): Promise<Product> {
+        return new Promise<Product>((resolve, reject) => {
+            try {
+                const sql = "SELECT model, selling_price AS sellingPrice, category, arrival_date AS arrivalDate, details, quantity FROM products WHERE model = ?";
+                db.get(sql, [model], (err: Error | null, row: Product | undefined) => {
+                    if (err) {
+                        reject(err)
+                    }
+                    resolve(row)
+                })
+            } catch (error) {
+                reject(error)
+            }
+        });
+    }
+
     /**
      * Search product by model
      * @param model
