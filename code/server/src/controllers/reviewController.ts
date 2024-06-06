@@ -1,5 +1,8 @@
 import { User } from "../components/user";
 import ReviewDAO from "../dao/reviewDAO";
+import ProductDAO from "../dao/productDAO";
+import {ProductNotFoundError} from "../errors/productError";
+import {ProductReview} from "../components/review";
 
 class ReviewController {
     private dao: ReviewDAO
@@ -23,7 +26,15 @@ class ReviewController {
      * @param model The model of the product to get reviews from
      * @returns A Promise that resolves to an array of ProductReview objects
      */
-    async getProductReviews(model: string) /**:Promise<ProductReview[]> */ { }
+    async getProductReviews(model: string):Promise<ProductReview[]> {
+
+        // if the model does not exist an error is thrown
+        if(!await ProductDAO.existsByModel(model)) {
+            throw new ProductNotFoundError();
+        }
+
+       return await ReviewDAO.getAllByModel(model);
+    }
 
     /**
      * Deletes the review made by a user for a product

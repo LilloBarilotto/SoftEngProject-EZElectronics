@@ -29,6 +29,28 @@ class ProductDAO {
         })
     }
 
+    /**
+     * Search product by model
+     * @param model
+     * @returns A promise that resolves to true if the product exists
+     */
+    static existsByModel(model: string): Promise<boolean> {
+        return new  Promise((resolve, reject) => {
+            try {
+                const sql = "SELECT * FROM products WHERE model = ?";
+                db.get(sql, [model], (err, row) => {
+                    if(err) {
+                        reject(err)
+                    }
+                    if (row !== null) resolve(true)
+                    resolve(false)
+                })
+            } catch (error){
+                reject(error)
+            }
+        })
+    }
+
 }
 
 export default ProductDAO
