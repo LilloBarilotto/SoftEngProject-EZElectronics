@@ -2,8 +2,10 @@ import Authenticator from "../../src/routers/auth";
 import request from "supertest";
 import { app } from "../../index";
 import ReviewController from "../../src/controllers/reviewController";
+import {Role} from "../../src/components/user";
 import {ProductReview} from "../../src/components/review";
 import {ProductNotFoundError} from "../../src/errors/productError";
+import {NoReviewProductError} from "../../src/errors/reviewError";
 
 const baseURL = "/ezelectronics/reviews";
 
@@ -63,5 +65,68 @@ describe ("GET /ezelectronics/reviews/:model", () => {
         const response = await request(app).get(baseURL + "/model").send();
 
         expect(response.status).toBe(404);
+    })
+})
+
+describe("DELETE ezelectronics/reviews/:model", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+    });
+
+    const testUser = {
+        username: "Mario Rossi",
+        name: "Mario",
+        surname: "Rossi",
+        role: Role.CUSTOMER,
+        address: "test",
+        birthdate: "2000-01-01"
+    }
+
+
+    test("should return a 401 response code if user is not customer", async () => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) =>  res.status(401).json({ error: "User is not a customer", status: 401 }));
+
+        const response = await request(app).delete(baseURL + "/model").send();
+
+        expect(response.status).toBe(401);
+    })
+
+    test("should return 200 success code", async () => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => {
+            req.user = testUser;
+            return next();
+        });
+        jest.spyOn(ReviewController.prototype, "deleteReview").mockResolvedValueOnce();
+
+        const response = await request(app).delete(baseURL + "/model").send();
+
+        expect(response.status).toBe(200);
+        expect(ReviewController.prototype.deleteReview).toHaveBeenCalledWith("model", testUser);
+    })
+
+    test("should return 404 error code if model does not exists", async() => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => {
+            req.user = testUser;
+            return next();
+        });
+        jest.spyOn(ReviewController.prototype, "deleteReview").mockRejectedValue(new ProductNotFoundError);
+
+        const response = await request(app).delete(baseURL + "/model").send();
+
+        expect(response.status).toBe(404);
+        expect(ReviewController.prototype.deleteReview).toHaveBeenCalledWith("model", testUser);
+    })
+
+    test("should return 404 error code if the current user does not have a review for the product identified by model", async() => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => {
+            req.user = testUser;
+            return next();
+        });
+        jest.spyOn(ReviewController.prototype, "deleteReview").mockRejectedValue(new NoReviewProductError);
+
+        const response = await request(app).delete(baseURL + "/model").send();
+
+        expect(response.status).toBe(404);
+        expect(ReviewController.prototype.deleteReview).toHaveBeenCalledWith("model", testUser);
     })
 })

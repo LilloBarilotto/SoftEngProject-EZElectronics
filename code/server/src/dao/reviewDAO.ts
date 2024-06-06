@@ -6,18 +6,14 @@ import {ProductReview} from "../components/review";
  * You are free to implement any method you need here, as long as the requirements are satisfied.
  */
 class ReviewDAO {
-
-    static create(review: ProductReview): Promise<boolean> {
+    deleteByUser(model: string, userName: string): Promise<number> {
         return new Promise((resolve, reject) => {
             try {
-                const sql = "INSERT INTO reviews (model, user, score, date, comment) VALUES (?, ?, ?, ?, ?)";
-                db.run(sql, [review.model, review.user, review.score, review.date, review.comment], function (err) {
+                const sql = "DELETE FROM reviews WHERE model = ? AND user = ?";
+                db.run(sql, [model, userName], function (err) {
                     if(err) reject(err);
-                    if(this.changes !== 1){
-                        resolve(false);
-                    }
-                    resolve(true);
-                } )
+                    resolve(this.changes);
+                })
             } catch (err) {
                 reject(err);
             }
@@ -29,7 +25,7 @@ class ReviewDAO {
      * @param model
      * @returns list of reviews
      */
-    static getAllByModel(model: string): Promise<ProductReview[]>{
+    getAllByModel(model: string): Promise<ProductReview[]>{
         return new Promise<ProductReview[]>((resolve, reject) => {
             try {
                 const sql = "SELECT * FROM reviews WHERE model = ?";
