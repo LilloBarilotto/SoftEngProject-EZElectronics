@@ -1,7 +1,7 @@
-import express, { Router } from "express"
+import express, {Router} from "express"
 import Authenticator from "./auth"
-import { body, param } from "express-validator"
-import { User } from "../components/user"
+import {body} from "express-validator"
+import {User} from "../components/user"
 import ErrorHandler from "../helper"
 import UserController from "../controllers/userController"
 
@@ -191,6 +191,9 @@ class AuthRoutes {
          */
         this.router.post(
             "/",
+            body("username").isString().notEmpty({ignore_whitespace: true}),
+            body("password").isString().notEmpty({ignore_whitespace: true}),
+            (req, res, next) => this.errorHandler.validateRequest(req, res, next),
             (req, res, next) => this.authService.login(req, res, next)
                 .then((user: User) => res.status(200).json(user))
                 .catch((err: any) => { res.status(401).json(err) })

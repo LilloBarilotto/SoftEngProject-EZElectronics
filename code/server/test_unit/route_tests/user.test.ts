@@ -1,17 +1,16 @@
-import { test, expect, jest , afterEach} from "@jest/globals"
+import {afterEach, expect, jest, test} from "@jest/globals"
 import request from 'supertest'
-import { app } from "../../index"
+import {app} from "../../index"
 
 import UserController from "../../src/controllers/userController"
+import {Role, User} from "../../src/components/user"
+import Authenticator from "../../src/routers/auth"
+
 const baseURL = "/ezelectronics"
 
-import { User, Role } from "../../src/components/user"
-import Authenticator from "../../src/routers/auth"
-import exp from "node:constants"
 //Example of a unit test for the POST ezelectronics/users route
 //The test checks if the route returns a 200 success code
 //The test also expects the createUser method of the controller to be called once with the correct parameters
-
 
 test("It should return a 200 success code", async () => {
     const testUser = { //Define a test user object sent to the route
@@ -62,4 +61,23 @@ describe("GET /ezelectronics/users", () => {
         expect(response.body).toEqual(userList); //Check if the response body is equal to the list of users
     });
 
+})
+
+
+describe("POST /sessions", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+    });
+
+    test("A validation error should occur", async () => {
+        const testCredentials= {
+            username: "   ",
+            password: "   "
+        };
+        const response = await request(app).post(baseURL + "/sessions").send(testCredentials);
+
+        expect(response.status).toBe(422);
+        expect(response.body.error).toContain("username");
+        expect(response.body.error).toContain("password");
+    })
 })
