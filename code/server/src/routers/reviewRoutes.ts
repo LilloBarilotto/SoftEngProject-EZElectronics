@@ -95,6 +95,7 @@ class ReviewRoutes {
          */
         this.router.delete(
             "/",
+            (req, res, next) => this.authenticator.isAdminOrManager(req, res, next),
             (req: any, res: any, next: any) => this.controller.deleteAllReviews()
                 .then(() => res.status(200).send())
                 .catch((err: Error) => next(err))

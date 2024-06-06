@@ -1,8 +1,8 @@
 import ProductDAO from "../../src/dao/productDAO";
+import ReviewDAO from "../../src/dao/reviewDAO";
 import ReviewController from "../../src/controllers/reviewController";
 import {ProductNotFoundError} from "../../src/errors/productError";
 import {ProductReview} from "../../src/components/review";
-import ReviewDAO from "../../src/dao/reviewDAO";
 import {Role} from "../../src/components/user";
 import {NoReviewProductError} from "../../src/errors/reviewError";
 
@@ -116,5 +116,19 @@ describe("deleteReview", () => {
 
         expect(ReviewDAO.prototype.deleteByUser).toHaveBeenCalledTimes(1);
         expect(ReviewDAO.prototype.deleteByUser).toHaveBeenCalledWith(testModel, testUser.username);
+    })
+})
+
+describe("deleteAllReviews", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    const controller = new ReviewController();
+
+    test("should return a promise that resolve nothing", async () => {
+        jest.spyOn(ReviewDAO.prototype, "deleteAll").mockResolvedValueOnce(5);
+
+        const response = await controller.deleteAllReviews();
     })
 })
