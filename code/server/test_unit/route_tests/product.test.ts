@@ -5,7 +5,11 @@ import { app } from "../../index"
 import ProductController from "../../src/controllers/productController"
 import {Category} from "../../src/components/product";
 import Authenticator from "../../src/routers/auth";
-import {ProductAlreadyExistsError} from "../../src/errors/productError";
+import {
+    ChangeDateAfterCurrentDateError, ChangeDateBeforeArrivalDateError,
+    ProductAlreadyExistsError,
+    ProductNotFoundError
+} from "../../src/errors/productError";
 import dayjs from "dayjs";
 const baseURL = "/ezelectronics"
 
@@ -94,4 +98,70 @@ describe("POST /ezelectronics/products", () => {
         expect(response.status).toBe(422)
         expect(ProductController.prototype.registerProducts).toHaveBeenCalledTimes(0)
     })
+});
+
+describe("PATCH /ezelectronics/products/:model", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    const testBody = {
+        quantity: 10,
+        changeDate: "2024-05-29"
+    }
+
+    test("should return a 200 success code with changeDate", async () => {
+        jest.spyOn(ProductController.prototype, "changeProductQuantity").mockResolvedValueOnce(100)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/iphone13").send(testBody)
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledWith(
+            "iphone13",
+            testBody.quantity,
+            testBody.changeDate
+        );
+    });
+
+    test("should return a 200 success code without changeDate", async () => {
+        jest.spyOn(ProductController.prototype, "changeProductQuantity").mockResolvedValueOnce(100)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/iphone13").send({...testBody, ...{changeDate: undefined}})
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledWith(
+            "iphone13",
+            testBody.quantity,
+            undefined
+        );
+    });
+
+    test("should return a 404 response code if the product does not exist", async () => {
+        jest.spyOn(ProductController.prototype, "changeProductQuantity").mockRejectedValue(new ProductNotFoundError)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/iphone13").send(testBody)
+        expect(response.status).toBe(404)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledWith(
+            "iphone13",
+            testBody.quantity,
+            testBody.changeDate
+        );
+    });
+
+    it.each([
+        ChangeDateAfterCurrentDateError,
+        ChangeDateBeforeArrivalDateError
+    ])("return a 400 response code if %s is thrown", async (exc) => {
+        jest.spyOn(ProductController.prototype, "changeProductQuantity").mockRejectedValue(new exc)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/iphone13").send(testBody)
+        expect(response.status).toBe(400)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledWith(
+            "iphone13",
+            testBody.quantity,
+            testBody.changeDate
+        );
+    });
 });

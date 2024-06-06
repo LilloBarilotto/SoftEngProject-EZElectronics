@@ -87,8 +87,12 @@ class ProductRoutes {
          */
         this.router.patch(
             "/:model",
+            //(req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            body("quantity").isInt({min: 1}),
+            body("changeDate").optional().isDate({format: "YYYY-MM-DD"}),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.changeProductQuantity(req.params.model, req.body.quantity, req.body.changeDate)
-                .then((quantity: any /**number */) => res.status(200).json({quantity: quantity}))
+                .then((quantity: number) => res.status(200).json({quantity: quantity}))
                 .catch((err) => next(err))
         )
 

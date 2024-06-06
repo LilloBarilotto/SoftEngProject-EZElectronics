@@ -1,5 +1,11 @@
 import ProductDAO from "../dao/productDAO";
 import {Category, Product} from "../components/product";
+import dayjs from "dayjs";
+import {
+    ChangeDateAfterCurrentDateError,
+    ChangeDateBeforeArrivalDateError,
+    ProductNotFoundError
+} from "../errors/productError";
 
 /**
  * Represents a controller for managing products.
@@ -36,7 +42,23 @@ class ProductController {
      * @param changeDate The optional date in which the change occurred.
      * @returns A Promise that resolves to the new available quantity of the product.
      */
-    async changeProductQuantity(model: string, newQuantity: number, changeDate: string | null) /**:Promise<number> */ {
+    async changeProductQuantity(model: string, newQuantity: number, changeDate: string | null) : Promise<number> {
+        const product = await this.dao.getProduct(model);
+        const date = changeDate === null ? dayjs() : dayjs(changeDate);
+
+        if (product === undefined) {
+            throw new ProductNotFoundError();
+        }
+        if (date.isAfter(dayjs())) {
+            throw new ChangeDateAfterCurrentDateError();
+        }
+        if (date.isBefore(dayjs(product.arrivalDate))) {
+            throw new ChangeDateBeforeArrivalDateError();
+        }
+
+        await this.dao.updateProduct(model, newQuantity, date.format("YYYY-MM-DD"));
+
+        return (await this.dao.getProduct(model)).quantity;
     }
 
     /**
