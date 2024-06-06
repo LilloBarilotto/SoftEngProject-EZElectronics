@@ -1,10 +1,10 @@
 import {afterEach, expect, jest, test} from "@jest/globals"
 import request from 'supertest'
-import { app } from "../../index"
+import {app} from "../../index"
 
 import UserController from "../../src/controllers/userController"
-import Authenticator from "../../src/routers/auth";
 import {Role, User} from "../../src/components/user"
+import Authenticator from "../../src/routers/auth"
 
 const baseURL = "/ezelectronics"
 
@@ -82,7 +82,6 @@ describe("POST /sessions", () => {
     })
 })
 
-
 describe("DELETE /sessions/current", () => {
     afterEach(() => {
         jest.resetAllMocks();
@@ -91,6 +90,19 @@ describe("DELETE /sessions/current", () => {
     test("Unauthenticated user", async () => {
         jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) =>  res.status(401).json({ error: "Unauthenticated user", status: 401 }))
         const response = await request(app).delete(baseURL + "/sessions/current").send();
+
+        expect(response.status).toBe(401);
+    })
+})
+
+describe("GET /sessions/current", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+    });
+
+    test("Unauthenticated user", async () => {
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) =>  res.status(401).json({ error: "Unauthenticated user", status: 401 }))
+        const response = await request(app).get(baseURL + "/sessions/current").send();
 
         expect(response.status).toBe(401);
     })
