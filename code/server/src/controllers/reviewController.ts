@@ -2,13 +2,16 @@ import { User } from "../components/user";
 import ReviewDAO from "../dao/reviewDAO";
 import ProductDAO from "../dao/productDAO";
 import {ProductNotFoundError} from "../errors/productError";
+import {NoReviewProductError} from "../errors/reviewError";
 import {ProductReview} from "../components/review";
 
 class ReviewController {
-    private dao: ReviewDAO
+    private reviewDAO: ReviewDAO
+    private productDAO: ProductDAO
 
     constructor() {
-        this.dao = new ReviewDAO
+        this.reviewDAO = new ReviewDAO
+        this.productDAO = new ProductDAO
     }
 
     /**
@@ -29,11 +32,11 @@ class ReviewController {
     async getProductReviews(model: string):Promise<ProductReview[]> {
 
         // if the model does not exist an error is thrown
-        if(!await ProductDAO.existsByModel(model)) {
+        if(!await this.productDAO.existsByModel(model)) {
             throw new ProductNotFoundError();
         }
 
-       return await ReviewDAO.getAllByModel(model);
+       return await this.reviewDAO.getAllByModel(model);
     }
 
     /**
@@ -42,7 +45,19 @@ class ReviewController {
      * @param user The user who made the review to delete
      * @returns A Promise that resolves to nothing
      */
-    async deleteReview(model: string, user: User) /**:Promise<void> */ { }
+    async deleteReview(model: string, user: User):Promise<void>  {
+        // if the model does not exist an error is thrown
+        if(!await this.productDAO.existsByModel(model)) {
+            throw new ProductNotFoundError();
+        }
+
+        const result = await this.reviewDAO.deleteByUser(model, user.username);
+
+        // user has not reviewed this product
+        if(result < 1 ){
+            throw new NoReviewProductError();
+        }
+    }
 
     /**
      * Deletes all reviews for a product

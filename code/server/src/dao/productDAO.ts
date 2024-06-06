@@ -34,7 +34,7 @@ class ProductDAO {
      * @param model
      * @returns A promise that resolves to true if the product exists
      */
-    static existsByModel(model: string): Promise<boolean> {
+    existsByModel(model: string): Promise<boolean> {
         return new  Promise((resolve, reject) => {
             try {
                 const sql = "SELECT * FROM products WHERE model = ?";
