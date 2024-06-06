@@ -11,6 +11,7 @@ jest.mock("../../src/db/db.ts")
 describe("createProduct", () => {
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.resetAllMocks();
     });
 
     test("resolves true if product is inserted", async () => {
@@ -38,6 +39,7 @@ describe("createProduct", () => {
 describe("updateProduct", () => {
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.resetAllMocks();
     });
 
     test("resolves true if product is updated", async () => {
@@ -61,7 +63,21 @@ describe("updateProduct", () => {
     });
 });
 
+describe("deleteAllProducts", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
 
-
-
-
+    test("resolves true if all products are deleted", async () => {
+        jest.spyOn(db, "run").mockImplementation((sql, callback) => {
+            callback(null)
+            return {} as Database
+        });
+        const productDAO = new ProductDAO()
+        const result = await productDAO.deleteAllProducts()
+        expect(result).toBe(true)
+        expect(db.run).toHaveBeenCalledTimes(1)
+        expect(db.run).toHaveBeenCalledWith("DELETE FROM products", expect.any(Function))
+    })
+});
