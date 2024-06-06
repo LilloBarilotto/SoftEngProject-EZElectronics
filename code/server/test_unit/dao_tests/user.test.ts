@@ -1,11 +1,9 @@
-import { test, expect, beforeAll, afterAll, jest , afterEach} from "@jest/globals"
-
-import UserController from "../../src/controllers/userController"
+import {afterEach, expect, jest, test} from "@jest/globals"
 import UserDAO from "../../src/dao/userDAO"
 import crypto from "crypto"
 import db from "../../src/db/db"
-import { Database } from "sqlite3"
-import { User , Role} from "../../src/components/user"
+import {Database} from "sqlite3"
+import {Role, User} from "../../src/components/user"
 
 jest.mock("crypto")
 jest.mock("../../src/db/db.ts")

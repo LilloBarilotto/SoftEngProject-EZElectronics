@@ -1,7 +1,7 @@
-import { test, expect, jest , afterEach} from "@jest/globals"
+import {afterEach, expect, jest, test} from "@jest/globals"
 import UserController from "../../src/controllers/userController"
 import UserDAO from "../../src/dao/userDAO"
-import { User, Role } from "../../src/components/user";
+import {Role, User} from "../../src/components/user";
 
 jest.mock("../../src/dao/userDAO")
 
