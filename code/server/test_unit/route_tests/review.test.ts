@@ -16,6 +16,7 @@ describe ("GET /ezelectronics/reviews/:model", () => {
 
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.resetAllMocks();
     });
 
     const testList: ProductReview[] = [
@@ -74,6 +75,7 @@ describe ("GET /ezelectronics/reviews/:model", () => {
 describe("DELETE ezelectronics/reviews/:model", () => {
     afterEach(() => {
         jest.resetAllMocks();
+        jest.restoreAllMocks();
     });
 
     const testUser = {
@@ -160,6 +162,7 @@ describe("DELETE ezelectronics/reviews", () => {
 describe('POST /ezelectronics/:model', () => {
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.resetAllMocks();
     });
 
     test("should return a 401 response code if user is not a customer", async () => {
@@ -242,3 +245,39 @@ describe('POST /ezelectronics/:model', () => {
     })
 
 });
+
+describe("DELETE ezelectronics/reviews/:model/all", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    test("should return a 401 response code if user is not a manage nor an admin", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req, res, next) =>  res.status(401).json({ error: "User is not an admin or manager", status: 401 }));
+
+        const response = await request(app).delete(baseURL + "/model/all").send();
+
+        expect(response.status).toBe(401);
+    })
+
+    test("should return 200 success code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req, res, next) => next());
+        jest.spyOn(ReviewController.prototype, "deleteReviewsOfProduct").mockResolvedValueOnce();
+
+        const response = await request(app).delete(baseURL + "/model/all").send();
+
+        expect(response.status).toBe(200);
+        expect(ReviewController.prototype.deleteReviewsOfProduct).toHaveBeenCalledWith("model");
+    })
+
+    test("should return 404 error code if model does not exist", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req, res, next) => next());
+        jest.spyOn(ReviewController.prototype, "deleteReviewsOfProduct").mockRejectedValue(new ProductNotFoundError);
+
+        const response = await request(app).delete(baseURL + "/model/all").send();
+
+        expect(response.status).toBe(404);
+        expect(ReviewController.prototype.deleteReviewsOfProduct).toHaveBeenCalledWith("model");
+    })
+
+})

@@ -78,6 +78,21 @@ class ReviewDAO {
             }
         })
     }
+
+    deleteAllByModel(model: string): Promise<number> {
+        return new Promise((resolve, reject) => {
+            try {
+                const sql = "DELETE FROM reviews WHERE model = ?";
+                db.run(sql, [model], function (err) {
+                    if(err) reject(err);
+                    resolve(this.changes);
+                })
+
+            } catch(err) {
+                reject(err);
+            }
+        })
+    }
 }
 
 export default ReviewDAO;

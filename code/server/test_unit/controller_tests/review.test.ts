@@ -197,5 +197,32 @@ describe("addReview", () => {
         expect(ProductDAO.prototype.existsByModel).toHaveBeenCalledWith(testReview.model);
 
     })
+})
 
+describe("deleteReviewsOfProduct", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    const controller = new ReviewController();
+    const testModel = "iPhone 13 Pro Max";
+
+
+    test("should throw ProductNotFoundError", async () => {
+        jest.spyOn(ProductDAO.prototype, "existsByModel").mockResolvedValueOnce(false);
+
+        const response = controller.deleteReviewsOfProduct(testModel);
+
+        await expect(response).rejects.toThrow(new ProductNotFoundError());
+        expect(ProductDAO.prototype.existsByModel).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.existsByModel).toHaveBeenCalledWith(testModel);
+    })
+
+    test("should return a promise that resolve nothing", async () => {
+        jest.spyOn(ProductDAO.prototype, "existsByModel").mockResolvedValueOnce(true);
+        jest.spyOn(ReviewDAO.prototype, "deleteAllByModel").mockResolvedValueOnce(2);
+
+        const response = await controller.deleteReviewsOfProduct(testModel);
+
+    })
 })
