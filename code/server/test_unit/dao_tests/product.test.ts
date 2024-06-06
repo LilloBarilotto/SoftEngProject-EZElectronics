@@ -143,3 +143,65 @@ describe("getProducts", () => {
         expect(mockDB).toHaveBeenCalledWith("SELECT model, selling_price AS sellingPrice, category, arrival_date as arrivalDate, details, quantity FROM products WHERE model = ?;", [testProducts[0].model], expect.any(Function));
     })
 });
+
+describe("getAvailableProducts", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    const testProducts = [
+        {
+            model: "iPhone 13 Pro Max",
+            sellingPrice: 100.50,
+            category: Category.SMARTPHONE,
+            arrivalDate: "2024-05-19",
+            details: "best phone",
+            quantity: 55
+        },
+        {
+            model: "Banana phone",
+            sellingPrice: 320,
+            category: Category.SMARTPHONE,
+            arrivalDate: "2024-03-17",
+            details: "worst phone",
+            quantity: 430
+        }
+    ];
+
+    test("resolves an array of Product objects", async () => {
+        const mockDB = jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, testProducts);
+            return {} as Database;
+        });
+        const productDAO = new ProductDAO();
+        const result = await productDAO.getAvailableProducts(undefined, undefined);
+        expect(result).toEqual(testProducts);
+        expect(mockDB).toHaveBeenCalledTimes(1);
+        expect(mockDB).toHaveBeenCalledWith("SELECT model, selling_price AS sellingPrice, category, arrival_date as arrivalDate, details, quantity FROM products WHERE quantity > 0", [], expect.any(Function));
+    });
+
+    test("resolves an array of Product objects filtered by category", async () => {
+        const mockDB = jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, testProducts);
+            return {} as Database;
+        });
+        const productDAO = new ProductDAO();
+        const result = await productDAO.getAvailableProducts("category", Category.SMARTPHONE);
+        expect(result).toEqual(testProducts);
+        expect(mockDB).toHaveBeenCalledTimes(1);
+        expect(mockDB).toHaveBeenCalledWith("SELECT model, selling_price AS sellingPrice, category, arrival_date as arrivalDate, details, quantity FROM products WHERE quantity > 0 AND category = ?;", [Category.SMARTPHONE], expect.any(Function));
+    })
+
+    test("resolves an array of Product objects filtered by model", async () => {
+        const mockDB = jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, testProducts);
+            return {} as Database;
+        });
+        const productDAO = new ProductDAO();
+        const result = await productDAO.getAvailableProducts("model", testProducts[0].model);
+        expect(result).toEqual(testProducts);
+        expect(mockDB).toHaveBeenCalledTimes(1);
+        expect(mockDB).toHaveBeenCalledWith("SELECT model, selling_price AS sellingPrice, category, arrival_date as arrivalDate, details, quantity FROM products WHERE quantity > 0 AND model = ?;", [testProducts[0].model], expect.any(Function));
+    })
+});
