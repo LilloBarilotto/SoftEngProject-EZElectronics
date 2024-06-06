@@ -1,10 +1,11 @@
 import express, { Router } from "express"
 import ErrorHandler from "../helper"
-import { body } from "express-validator"
+import {body, query} from "express-validator"
 import ProductController from "../controllers/productController"
 import Authenticator from "./auth"
 import dayjs from "dayjs";
 import {DateError} from "../utilities";
+import {Product} from "../components/product";
 
 /**
  * Represents a class that defines the routes for handling proposals.
@@ -126,8 +127,33 @@ class ProductRoutes {
          */
         this.router.get(
             "/",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            query('grouping').optional().isString().isIn(["category", "model"]).custom((grouping, {req}) => {
+                if (grouping == "model" && !req.query.model) throw new Error("Model must be present if grouping is model");
+                if (grouping == "category" && !req.query.category) throw new Error("Category must be present if grouping is category");
+                return true;
+            }),
+            query('category').optional().isString().isIn(["Smartphone", "Laptop", "Appliance"]).custom((category, {req}) => {
+                if (!req.query.grouping) throw new Error("Category cannot be present if grouping is disabled");
+                if (req.query.grouping === "model") throw new Error("Category cannot be present if grouping is model");
+                if (req.query.grouping === "category") {
+                    if (!category) throw new Error("Category must be present if grouping is category");
+                    if (req.query.model) throw new Error("Model cannot be present if grouping is category");
+                }
+                return true;
+            }),
+            query('model').optional().isString().notEmpty({ignore_whitespace: true}).custom((model, {req}) => {
+                if (!req.query.grouping) throw new Error("Model cannot be present if grouping is disabled");
+                if (req.query.grouping === "category") throw new Error("Model cannot be present if grouping is category");
+                if (req.query.grouping === "model") {
+                    if (!model) throw new Error("Model must be present if grouping is model");
+                    if (req.query.category) throw new Error("Category cannot be present if grouping is model");
+                }
+                return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.getProducts(req.query.grouping, req.query.category, req.query.model)
-                .then((products: any /*Product[]*/) => res.status(200).json(products))
+                .then((products: Product[]) => res.status(200).json(products))
                 .catch((err) => {
                     console.log(err)
                     next(err)
