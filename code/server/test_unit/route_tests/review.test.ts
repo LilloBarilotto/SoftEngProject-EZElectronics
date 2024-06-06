@@ -1,3 +1,4 @@
+import { test, expect, jest } from "@jest/globals"
 import Authenticator from "../../src/routers/auth";
 import request from "supertest";
 import { app } from "../../index";
@@ -6,6 +7,8 @@ import {Role} from "../../src/components/user";
 import {ProductReview} from "../../src/components/review";
 import {ProductNotFoundError} from "../../src/errors/productError";
 import {NoReviewProductError} from "../../src/errors/reviewError";
+import {ExistingReviewError} from "../../src/errors/reviewError";
+
 
 const baseURL = "/ezelectronics/reviews";
 
@@ -152,5 +155,90 @@ describe("DELETE ezelectronics/reviews", () => {
 
         expect(response.status).toBe(200);
     })
-
 })
+
+describe('POST /ezelectronics/:model', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should return a 401 response code if user is not a customer", async () => {
+        const testReview = {
+            score: 4,
+            comment: "test"
+        }
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => res.status(401).json({ error: "User is not a customer", status: 401 }));
+        const response = await request(app).post(baseURL + "/model").send(testReview);
+        expect(response.status).toBe(401);
+    })
+
+    test("A validation error should occur", async () => {
+
+        const testReview = {
+            score: 10,
+            comment: "    "
+        }
+
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => next());
+        const response = await request(app).post(baseURL + "/model").send(testReview);
+
+        expect(response.status).toBe(422);
+        expect(response.body.error).toContain("score");
+        expect(response.body.error).toContain("comment");
+
+    })
+
+    test("should return 200 success code", async () => {
+
+        const testUser = {
+            username: "Mario Rossi",
+            name: "Mario",
+            surname: "Rossi",
+            role: Role.CUSTOMER,
+            address: "test",
+            birthdate: "2000-01-01"
+        }
+
+        const testReview = {
+            score: 5,
+            comment: "test"
+        }
+
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => {
+            // TODO: insert user into request
+            req.user = testUser;
+            return next();
+        });
+
+
+        jest.spyOn(ReviewController.prototype, "addReview").mockResolvedValueOnce();
+        const response = await request(app).post(baseURL + "/model").send(testReview);
+        expect(response.status).toBe(200);
+        expect(ReviewController.prototype.addReview).toHaveBeenCalledWith("model", testUser, testReview.score, testReview.comment);
+    })
+
+    test("should return a 404 error if model does not exists", async () => {
+        const testReview = {
+            score: 5,
+            comment: "test"
+        }
+
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => next());
+        jest.spyOn(ReviewController.prototype, "addReview").mockRejectedValue(new ProductNotFoundError);
+        const response = await request(app).post(baseURL + "/model").send(testReview);
+        expect(response.status).toBe(404)
+    })
+
+    test("should return a 409 error if there is an existing review for the product made by the customer", async () => {
+        const testReview = {
+            score: 5,
+            comment: "test"
+        }
+
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req, res, next) => next());
+        jest.spyOn(ReviewController.prototype, "addReview").mockRejectedValue(new ExistingReviewError);
+        const response = await request(app).post(baseURL + "/model").send(testReview);
+        expect(response.status).toBe(409)
+    })
+
+});

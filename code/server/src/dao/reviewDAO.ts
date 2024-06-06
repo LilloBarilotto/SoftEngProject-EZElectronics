@@ -61,6 +61,23 @@ class ReviewDAO {
             }
         })
     }
+
+    create(review: ProductReview): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+            try {
+                const sql = "INSERT INTO reviews (model, user, score, date, comment) VALUES (?, ?, ?, ?, ?)";
+                db.run(sql, [review.model, review.user, review.score, review.date, review.comment], function (err) {
+                    if(err) reject(err);
+                    if(this.changes !== 1){
+                        resolve(false);
+                    }
+                    resolve(true);
+                } )
+            } catch (err) {
+                reject(err);
+            }
+        })
+    }
 }
 
 export default ReviewDAO;
