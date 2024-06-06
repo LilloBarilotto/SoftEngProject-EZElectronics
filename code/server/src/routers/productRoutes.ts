@@ -59,7 +59,7 @@ class ProductRoutes {
          */
         this.router.post(
             "/",
-            (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             body("model").isString().notEmpty(),
             body("category").isString().isIn(["Smartphone", "Laptop", "Appliance"]),
             body("quantity").isInt({min: 1}),
@@ -87,7 +87,7 @@ class ProductRoutes {
          */
         this.router.patch(
             "/:model",
-            //(req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             body("quantity").isInt({min: 1}),
             body("changeDate").optional().isDate({format: "YYYY-MM-DD"}),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),

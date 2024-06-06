@@ -29,7 +29,7 @@ describe("POST /ezelectronics/products", () => {
 
     test("should return a 200 success code", async () => {
         jest.spyOn(ProductController.prototype, "registerProducts").mockResolvedValueOnce(true)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         const response = await request(app).post(baseURL + "/products").send(testProduct)
         expect(response.status).toBe(200)
         expect(ProductController.prototype.registerProducts).toHaveBeenCalledTimes(1)
@@ -45,7 +45,7 @@ describe("POST /ezelectronics/products", () => {
 
     test("should return a 401 response code if user is not a manager", async () => {
         jest.spyOn(ProductController.prototype, "registerProducts").mockResolvedValueOnce(true)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a manager", status: 401 }))
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a manager", status: 401 }))
         const response = await request(app).post(baseURL + "/products").send(testProduct)
         expect(response.status).toBe(401)
         expect(ProductController.prototype.registerProducts).toHaveBeenCalledTimes(0)
@@ -53,7 +53,7 @@ describe("POST /ezelectronics/products", () => {
 
     test("should return a 409 response code if the product already exists", async () => {
         jest.spyOn(ProductController.prototype, "registerProducts").mockRejectedValue(new ProductAlreadyExistsError)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         const response = await request(app).post(baseURL + "/products").send(testProduct)
         expect(response.status).toBe(409)
         expect(ProductController.prototype.registerProducts).toHaveBeenCalledTimes(1)
@@ -81,7 +81,7 @@ describe("POST /ezelectronics/products", () => {
         {key: "sellingPrice", value: 0.0}
     ])("return a 422 response code if %s is invalid", async (invalidField) => {
         jest.spyOn(ProductController.prototype, "registerProducts").mockResolvedValueOnce(true)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         const productWithInvalidField = {...testProduct, ...{[invalidField.key]: invalidField.value}}
         const response = await request(app).post(baseURL + "/products").send(productWithInvalidField)
         expect(response.status).toBe(422)
@@ -91,7 +91,7 @@ describe("POST /ezelectronics/products", () => {
     // The check for the arrivalDate require a bit more logic to mock the dayjs method.
     test("should return a 422 response code if the arrivalDate is after today", async () => {
         jest.spyOn(ProductController.prototype, "registerProducts").mockResolvedValueOnce(true)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         jest.spyOn(dayjs.prototype, "isBefore").mockReturnValueOnce(true)
         const productWithInvalidField = {...testProduct, ...{arrivalDate: "2025-05-19"}}
         const response = await request(app).post(baseURL + "/products").send(productWithInvalidField)
