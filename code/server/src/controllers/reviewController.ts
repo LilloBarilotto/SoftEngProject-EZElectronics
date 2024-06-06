@@ -79,7 +79,15 @@ class ReviewController {
      * @param model The model of the product to delete the reviews from
      * @returns A Promise that resolves to nothing
      */
-    async deleteReviewsOfProduct(model: string) /**:Promise<void> */ { }
+    async deleteReviewsOfProduct(model: string) :Promise<void>  {
+
+        // if the model does not exist an error is thrown
+        if(!await this.productDAO.existsByModel(model)) {
+            throw new ProductNotFoundError();
+        }
+
+        await this.reviewDAO.deleteAllByModel(model);
+    }
 
     /**
      * Deletes all reviews of all products

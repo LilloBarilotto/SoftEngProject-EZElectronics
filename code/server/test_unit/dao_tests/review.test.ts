@@ -6,6 +6,7 @@ import {Database} from "sqlite3"
 import ReviewDAO from "../../src/dao/reviewDAO";
 import {Role} from "../../src/components/user";
 import * as MockDate from "mockdate";
+import exp = require("node:constants");
 
 jest.mock("../../src/db/db.ts");
 
@@ -125,5 +126,27 @@ describe ('create review', ()=>{
         expect(result).toBe(true);
         expect(mockDb).toHaveBeenCalledTimes(1);
         expect(mockDb).toHaveBeenCalledWith("INSERT INTO reviews (model, user, score, date, comment) VALUES (?, ?, ?, ?, ?)", ["iPhone 13 Pro Max", "Mario Rossi", 4, date, "test"], expect.any(Function));
+    })
+})
+
+describe("deleteAllByModel", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    const testModel = "iPhone 13 Pro Max";
+
+    test("should resolve the number of deleted rows", async () => {
+        const mockDb = jest.spyOn(db, "run").mockImplementation((sql, param, callback) => {
+            callback.call({changes: 5}, null);
+            return {} as Database;
+        });
+        const reviewDAO = new ReviewDAO();
+
+        const response = await reviewDAO.deleteAllByModel(testModel);
+        expect(response).toBe(5);
+        expect(mockDb).toHaveBeenCalledTimes(1);
+        expect(mockDb).toHaveBeenCalledWith("DELETE FROM reviews WHERE model = ?", [testModel], expect.any(Function));
     })
 })
