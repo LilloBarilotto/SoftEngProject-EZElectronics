@@ -4,8 +4,11 @@ import dayjs from "dayjs";
 import {
     ChangeDateAfterCurrentDateError,
     ChangeDateBeforeArrivalDateError,
-    ProductNotFoundError
+    ProductNotFoundError,
+    EmptyProductStockError,
+    LowProductStockError
 } from "../errors/productError";
+import {DateError} from "../utilities";
 
 /**
  * Represents a controller for managing products.
@@ -68,7 +71,28 @@ class ProductController {
      * @param sellingDate The optional date in which the sale occurred.
      * @returns A Promise that resolves to the new available quantity of the product.
      */
-    async sellProduct(model: string, quantity: number, sellingDate: string | null) /**:Promise<number> */ {
+    async sellProduct(model: string, quantity: number, sellingDate: string | null): Promise<number> {
+        const product = await this.dao.getProduct(model);
+        const sellingDateParsed = sellingDate ?? dayjs().format("YYYY-MM-DD");
+
+        if (!product) {
+            throw new ProductNotFoundError();
+        }
+
+        if (dayjs(sellingDateParsed).isAfter(product.arrivalDate, "day")) {
+            throw new DateError();
+        }
+
+        if (product.quantity === 0) {
+            throw new EmptyProductStockError();
+        }
+
+        if (product.quantity < quantity) {
+            throw new LowProductStockError();
+        }
+
+        await this.dao.sellProduct(model, quantity);
+        return product.quantity - quantity;
     }
 
     /**

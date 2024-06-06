@@ -209,6 +209,7 @@ describe("getAvailableProducts", () => {
 describe("deleteProduct", () => {
     afterEach(() => {
         jest.restoreAllMocks();
+        jest.resetAllMocks();
     });
 
     test("resolves true if product is deleted", async () => {
@@ -221,5 +222,24 @@ describe("deleteProduct", () => {
         expect(result).toBe(true)
         expect(mockDB).toHaveBeenCalledTimes(1);
         expect(mockDB).toHaveBeenCalledWith("DELETE FROM products WHERE model = ?", ["iphone13"], expect.any(Function))
+    });
+});
+
+describe("sellProduct", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    test("resolves true if product is sold", async () => {
+        jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
+            callback(null)
+            return {} as Database
+        });
+        const productDAO = new ProductDAO();
+        const result = await productDAO.sellProduct("iPhone 13 Pro Max", 5);
+        expect(result).toBe(true);
+        expect(db.run).toBeCalledTimes(1);
+        expect(db.run).toBeCalledWith("UPDATE products SET quantity = quantity - ? WHERE model = ?", [5, "iPhone 13 Pro Max"], expect.any(Function));
     });
 });

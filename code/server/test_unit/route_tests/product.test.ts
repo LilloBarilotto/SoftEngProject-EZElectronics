@@ -349,3 +349,51 @@ describe("DELETE /ezelectronics/products/:model", () => {
         expect(ProductController.prototype.deleteProduct).toHaveBeenCalledTimes(1)
     });
 });
+
+describe("PATCH /ezelectronics/products/:model/sell", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    const testModel = "iphone"
+
+    const testBody = { //Define a test user object sent to the route
+        quantity: 5,
+    }
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
+        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send(testBody)
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.sellProduct).toHaveBeenCalledWith(
+            testModel,
+            testBody.quantity,
+            undefined
+        )
+    });
+
+    test("should return a 401 response code if user is not a manager", async () => {
+        jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
+        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a manager", status: 401 }))
+        const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send(testBody)
+        expect(response.status).toBe(401)
+        expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(0)
+    });
+
+    // This test checks if the route returns a 422 response code if any of the fields is invalid
+    it.each([
+        {sellingDate: undefined, quantity: 0},
+        {sellingDate: undefined, quantity: -1},
+        {sellingDate: "05-06-2024", quantity: 10},
+        {sellingDate: dayjs().add(1, "day").format("YYYY-MM-DD"), quantity: testBody.quantity},
+    ])("return a 422 response code if %s is invalid", async (invalidBody) => {
+        jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
+        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send(invalidBody)
+        expect(response.status).toBe(422)
+        expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(0)
+    })
+
+});

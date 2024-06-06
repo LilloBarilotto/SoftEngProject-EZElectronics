@@ -5,10 +5,13 @@ import {Category, Product} from "../../src/components/product";
 import {
     ChangeDateAfterCurrentDateError,
     ChangeDateBeforeArrivalDateError,
-    ProductNotFoundError
+    ProductNotFoundError,
+    EmptyProductStockError,
+    LowProductStockError
 } from "../../src/errors/productError";
 import * as MockDate from "mockdate";
 import dayjs from "dayjs";
+import {DateError} from "../../src/utilities";
 
 jest.mock("../../src/dao/productDAO")
 
@@ -309,5 +312,77 @@ describe("deleteProduct", () => {
         await expect(controller.deleteProduct(testProduct.model)).rejects.toThrow(ProductNotFoundError);
 
         expect(ProductDAO.prototype.deleteProduct).toHaveBeenCalledTimes(0);
+    });
+});
+
+describe("sellProduct", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    const testProduct = new Product(
+        100.50,
+        "iPhone 13 Pro Max",
+        Category.SMARTPHONE,
+        "2024-05-19",
+        "details",
+        55);
+
+    test("should return the new quantity of the product", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProduct);
+        jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        const response = await controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"));
+
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
+        expect(ProductDAO.prototype.sellProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.sellProduct).toHaveBeenCalledWith(testProduct.model, 5);
+        expect(response).toBe(50);
+    });
+
+    test("should throw ProductNotFoundError", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(null);
+        jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).add(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(ProductNotFoundError);
+
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
+        expect(ProductDAO.prototype.sellProduct).toHaveBeenCalledTimes(0);
+    });
+
+    test("should throw DateError", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProduct);
+        jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).add(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(DateError);
+
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
+        expect(ProductDAO.prototype.sellProduct).toHaveBeenCalledTimes(0);
+    });
+
+    test("should throw EmptyProductStockError", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce({...testProduct, quantity: 0});
+        jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(EmptyProductStockError);
+
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
+        expect(ProductDAO.prototype.sellProduct).toHaveBeenCalledTimes(0);
+    });
+
+    test("should throw LowProductStockError", async () => {
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce({...testProduct, quantity: 3});
+        jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(LowProductStockError);
+
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
+        expect(ProductDAO.prototype.sellProduct).toHaveBeenCalledTimes(0);
     });
 });

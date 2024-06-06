@@ -1,6 +1,6 @@
 import express, { Router } from "express"
 import ErrorHandler from "../helper"
-import {body, query} from "express-validator"
+import {body, param, query} from "express-validator"
 import ProductController from "../controllers/productController"
 import Authenticator from "./auth"
 import dayjs from "dayjs";
@@ -66,7 +66,7 @@ class ProductRoutes {
             body("quantity").isInt({min: 1}),
             body("details").isString().optional(),
             body("sellingPrice").isFloat({min: 0.01}),
-            body("arrivalDate").custom((date, {req}) => {
+            body("arrivalDate").optional().matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
                 if (date === undefined || date === "") return true;
                 if (dayjs().isBefore(date, "day")) throw new DateError();
                 else return true;
@@ -108,8 +108,17 @@ class ProductRoutes {
          */
         this.router.patch(
             "/:model/sell",
+            (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
+            param("model").isString().notEmpty({ignore_whitespace: true}),
+            body("quantity").isInt({min: 1}),
+            body("sellingDate").optional().matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
+                if (date === undefined || date === "") return true;
+                if (dayjs().isBefore(date, "day")) throw new DateError();
+                else return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.sellProduct(req.params.model, req.body.quantity, req.body.sellingDate)
-                .then((quantity: any /**number */) => res.status(200).json({quantity: quantity}))
+                .then((quantity: number) => res.status(200).json({quantity: quantity}))
                 .catch((err) => {
                     console.log(err)
                     next(err)
