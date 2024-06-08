@@ -101,3 +101,30 @@ describe("getUserByUsername", () => {
         expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE username = ?", ["username4"], expect.any(Function))
     })
 });
+
+describe("getUsersByRole", () => {
+    const userList : User[] = [
+        new User("username1", "name1", "surname1", Role.ADMIN, "", ""),
+        new User("username2", "name2", "surname2", Role.MANAGER, "", ""),
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", ""),
+        new User("username4", "name4", "surname4", Role.CUSTOMER, "", "")
+    ]
+
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+
+    test("It should return an array of users with the specified role", async () => {
+        const userDAO = new UserDAO()
+        const mockDBGet = jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, [userList[2], userList[3]])
+            return {} as Database
+        })
+        const result = await userDAO.getUsersByRole("Customer")
+        expect(result).toEqual([userList[2], userList[3]])
+        expect(mockDBGet).toHaveBeenCalledTimes(1);
+        expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE role = ?", ["Customer"], expect.any(Function))
+    });
+});

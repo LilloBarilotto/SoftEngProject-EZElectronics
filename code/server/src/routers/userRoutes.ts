@@ -84,8 +84,11 @@ class UserRoutes {
          */
         this.router.get(
             "/roles/:role",
+            (req: any, res: any, next: any) => this.authService.isAdmin(req, res, next),
+            param("role").isString().notEmpty().isIn(["Manager", "Customer", "Admin"]),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.getUsersByRole(req.params.role)
-                .then((users: any /**User[] */) => res.status(200).json(users))
+                .then((users: User[]) => res.status(200).json(users))  
                 .catch((err) => next(err))
         )
 

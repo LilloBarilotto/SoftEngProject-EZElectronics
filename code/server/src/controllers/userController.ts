@@ -40,7 +40,9 @@ class UserController {
      * @param role - The role of the users to retrieve. It can only be one of the three allowed types ("Manager", "Customer", "Admin")
      * @returns A Promise that resolves to an array of users with the specified role.
      */
-    async getUsersByRole(role: string) /**:Promise<User[]> */ { }
+    async getUsersByRole(role: string) :Promise<User[]> {
+        return this.dao.getUsersByRole(role);
+     }
 
     /**
      * Returns a specific user.
