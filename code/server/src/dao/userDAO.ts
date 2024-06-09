@@ -123,5 +123,31 @@ class UserDAO {
         })
     }
 
+    /** Return all users with a specific role from the database
+     * @param role The role of the users to retrieve
+     * @returns A Promise that resolves to an array of all users with the specified role in the database
+     * */
+    getUsersByRole(role: string): Promise<User[]> {
+        return new Promise<User[]>((resolve, reject) => {
+            try {
+                const sql = "SELECT * FROM users WHERE role = ?"
+                db.all(sql, [role], (err: Error | null, rows: any[]) => {
+                    if (err) {
+                        reject(err)
+                        return
+                    }
+
+                    const users: User[] = rows.map(row => new User(row.username, row.name, row.surname, row.role, row.address, row.birthdate))
+                    resolve(users)
+                })
+            } catch (error) {
+                reject(error)
+            }
+
+        })
+    }
+    
+
+
 }
 export default UserDAO

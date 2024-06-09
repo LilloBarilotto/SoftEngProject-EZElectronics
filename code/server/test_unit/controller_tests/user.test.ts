@@ -119,3 +119,32 @@ describe("getUserByUsername", () => {
     });
 
 });
+
+
+describe("getUsersByRole", () => {
+
+    const userList : User[] = [
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", ""),
+        new User("username4", "name4", "surname4", Role.CUSTOMER, "", "")
+    ]
+
+    afterEach(() => {
+        jest.clearAllMocks();
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+
+    //Example of a unit test for the getUsers method of the UserController
+    //The test checks if the method returns the list of users when the DAO method returns the list of users
+    //The test also expects the DAO method to be called once
+    test("It should return an array of users", async () => {
+        const MockGetUsersByRole = jest.spyOn(UserDAO.prototype, "getUsersByRole").mockResolvedValueOnce(userList); //Mock the getUsersByRole method of the DAO 
+        const controller = new UserController(); //Create a new instance of the controller
+        const response = await controller.getUsersByRole("Customer"); //Call the getUsers method of the controller
+
+        //Check if the getUsers method of the DAO has been called once
+        expect(MockGetUsersByRole).toHaveBeenCalledTimes(1);
+        expect(response).toEqual(userList); //Check if the response is equal to the list of users
+    });
+});

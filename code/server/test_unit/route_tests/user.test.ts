@@ -156,3 +156,43 @@ describe("GET /ezelectronics/users/:username", () => {
     });
 
 });
+
+
+describe("GET /ezelectronics/users/roles/:role", () => {
+
+    const userList : User[] = [
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", ""),
+        new User("username4", "name4", "surname4", Role.CUSTOMER, "", "")
+    ];
+
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("should return a 401 response code if user is not Admin", async () => {
+        jest.spyOn(UserController.prototype, "getUsersByRole").mockResolvedValueOnce(userList); //Mock the getUsersByRole method of the controller
+        jest.spyOn(Authenticator.prototype, "isAdmin").mockImplementation((req, res, next) => res.status(401).json({ error: "User is not an admin", status: 401 }));
+        const response = await request(app).get(baseURL + "/users/roles/Customer").send();
+        expect(response.status).toBe(401);
+        expect(response.body).toEqual({ error: "User is not an admin", status: 401 });
+        expect(UserController.prototype.getUsersByRole).toHaveBeenCalledTimes(0);
+    });
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(UserController.prototype, "getUsersByRole").mockResolvedValueOnce(userList); //Mock the getUsersByRole method of the controller
+        jest.spyOn(Authenticator.prototype, "isAdmin").mockImplementation((req, res, next) => next());
+        const response = await request(app).get(baseURL + "/users/roles/Customer").send(); //Send a GET request to the route
+        expect(response.status).toBe(200); //Check if the response status is 200
+        expect(UserController.prototype.getUsersByRole).toHaveBeenCalledTimes(1); //Check if the getUsersByRole method has been called once
+        expect(response.body).toEqual(userList); //Check if the response body is equal to the list of users
+    });
+
+    test("should return a 422 response code if the role is not valid", async () => {
+        jest.spyOn(UserController.prototype, "getUsersByRole").mockResolvedValueOnce(userList); //Mock the getUsersByRole method of the controller
+        jest.spyOn(Authenticator.prototype, "isAdmin").mockImplementation((req, res, next) => next());
+        const response = await request(app).get(baseURL + "/users/roles/InvalidRole").send(); //Send a GET request to the route
+        expect(response.status).toBe(422); //Check if the response status is 422
+        expect(UserController.prototype.getUsersByRole).toHaveBeenCalledTimes(0); //Check if the getUsersByRole method has not been called
+    });
+});
