@@ -68,6 +68,18 @@ class CartDAO {
         await db.run(`DELETE FROM productsInCart WHERE cartId = ?`, [cart.id]);
         await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
+
+    async getCartsAll(): Promise<Cart[]> {
+        return new Promise((resolve, reject) => {
+            db.all(`SELECT * FROM carts`, [], (err, rows: any[]) => {
+                if (err) {
+                    return reject(err);
+                }
+                const carts = rows.map(row => new Cart(row.customer, row.paid, row.paymentDate, row.total, []));
+                resolve(carts);
+            });
+        });
+    }
 }
 
 export default CartDAO;
