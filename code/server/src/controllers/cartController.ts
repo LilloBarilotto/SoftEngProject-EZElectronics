@@ -51,7 +51,9 @@ class CartController {
      * @returns A Promise that resolves to an array of carts belonging to the customer.
      * Only the carts that have been checked out should be returned, the current cart should not be included in the result.
      */
-    async getCustomerCarts(user: User) { } /**Promise<Cart[]> */
+    async getCustomerCarts(user: User): Promise<Cart[]> {
+        return await this.dao.getAllCarts(user.username);
+    }
 
     /**
      * Removes one product unit from the current cart. In case there is more than one unit in the cart, only one should be removed.

@@ -1,10 +1,11 @@
 import {describe, afterEach, beforeEach, test, expect, jest } from "@jest/globals";
+import CartController from "./../../src/controllers/cartController";
 import CartDAO from "./../../src/dao/cartDAO";
 import { CallTracker } from "assert";
-import CartController from "./../../src/controllers/cartController";
 import { CartNotFoundError } from "./../../src/errors/cartError";
 import { User, Role  } from "./../../src/components/user";
 import {Cart} from "./../../src/components/cart"
+
 jest.mock("./../../src/dao/cartDAO");
 
 describe("CartController deleteAllCarts", () => {
@@ -73,7 +74,7 @@ describe("CartController clearCart", () => {
     });
 });
 
-describe("CartController getAllCarts", () => {
+describe("CartController getCartsAll", () => {
     afterEach(() => {
         jest.clearAllMocks();
     });
@@ -97,5 +98,40 @@ describe("CartController getAllCarts", () => {
         const controller: CartController =  new CartController;
         await expect(controller.getAllCarts()).rejects.toThrow("Failed to retrieve all carts");
         expect(CartDAO.prototype.getCartsAll).toHaveBeenCalled();
+    });
+});
+
+describe("CartController getAllCarts", () => {
+    const user: User = {
+        username: "testuser", role: Role.CUSTOMER,
+        name: "test",
+        surname: "test",
+        address: "test",
+        birthdate: "test"
+    };
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test("should retrieve all paid carts for a specific customer", async () => {
+        const controller: CartController =  new CartController;
+        const carts: Cart[] = [
+            { customer: "testuser", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 100, products: [] },
+            { customer: "testuser", paid: true, paymentDate: "2023-02-01T00:00:00.000Z", total: 200, products: [] },
+        ];
+
+        jest.spyOn(CartDAO.prototype, "getAllCarts").mockResolvedValue(carts);
+
+        const result = await controller.getCustomerCarts(user);
+        expect(result).toEqual(carts);
+        expect(CartDAO.prototype.getAllCarts).toHaveBeenCalledWith(user.username);
+    });
+    test("should throw an error if retrieval fails", async () => {
+        const controller: CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "getAllCarts").mockRejectedValue(new Error("Failed to retrieve carts"));
+
+        await expect(controller.getCustomerCarts(user)).rejects.toThrow("Failed to retrieve carts");
+        expect(CartDAO.prototype.getAllCarts).toHaveBeenCalledWith(user.username);
     });
 });
