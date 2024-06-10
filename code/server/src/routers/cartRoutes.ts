@@ -50,14 +50,16 @@ class CartRoutes {
          */
         this.router.get(
             "/",
-            (req: any, res: any, next: any) => this.controller.getCart(req.user)
-                .then((cart: any /**Cart */) => {
-                    res.status(200).json(cart)
-                })
-                .catch((err) => {
-                    next(err)
-                })
-        )
+            (req: any, res: any, next: any) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const cart = await this.controller.getCart(req.user);
+                    res.status(200).json(cart);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for adding a product unit to the cart of the logged in customer.

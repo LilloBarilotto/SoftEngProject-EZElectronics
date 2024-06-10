@@ -1,4 +1,4 @@
-import {expect, jest, test} from "@jest/globals"
+import {expect,describe, afterEach,  jest, test} from "@jest/globals"
 
 import ProductDAO from "../../src/dao/productDAO"
 import db from "../../src/db/db"
@@ -13,14 +13,15 @@ describe("createProduct", () => {
         jest.resetAllMocks();
         jest.restoreAllMocks();
     });
-
+    const productDAO = new ProductDAO();
+    const product = new Product(100.50, "iPhone 13 Pro Max", Category.SMARTPHONE, "2024-05-19", "details", 55)
+    
     test("resolves true if product is inserted", async () => {
         jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
             callback(null)
             return {} as Database
         });
-        const productDAO = new ProductDAO()
-        const product = new Product(100.50, "iPhone 13 Pro Max", Category.SMARTPHONE, "2024-05-19", "details", 55)
+      
         const result = await productDAO.createProduct(product)
         expect(result).toBe(true)
     })
@@ -30,8 +31,7 @@ describe("createProduct", () => {
             callback(new Error("UNIQUE constraint failed: products.model"))
             return {} as Database
         });
-        const productDAO = new ProductDAO()
-        const product = new Product(100.50, "iPhone 13 Pro Max", Category.SMARTPHONE, "2024-05-19", "details", 55)
+       
         await expect(productDAO.createProduct(product)).rejects.toThrow(ProductAlreadyExistsError)
     })
 });
