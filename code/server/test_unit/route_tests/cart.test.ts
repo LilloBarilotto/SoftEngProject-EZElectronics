@@ -95,3 +95,41 @@ describe("CartRoutes GET /carts", () => {
         expect(response.status).toBe(401);
     });
 });
+
+describe("CartRoutes GET /carts", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should retrieve the history of the logged in customer's carts", async () => {
+        const carts: Cart[] = [
+            { customer: "testuser", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 100, products: [] },
+            { customer: "testuser", paid: true, paymentDate: "2023-02-01T00:00:00.000Z", total: 200, products: [] },
+        ];
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(CartController.prototype, "getCustomerCarts").mockResolvedValue(carts);
+
+        const response = await request(app)
+            .get(baseURL + "/carts/history")
+            .send({ username: "testuser" });
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(carts);
+    });
+
+    test("should return 500 if retrieval fails", async () => {
+
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+
+        const response = await request(app)
+            .get(baseURL + "/carts/history")
+            .send({ username: "testuser" });
+        expect(response.status).toBe(503);
+    });
+
+    test("should return 401 for unauthorized access", async () => {
+        const response = await request(app).get(baseURL + "/carts/history");
+        expect(response.status).toBe(401);
+    });
+});

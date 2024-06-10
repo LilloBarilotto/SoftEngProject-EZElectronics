@@ -80,6 +80,43 @@ class CartDAO {
             });
         });
     }
+
+    async getAllCarts(username: String): Promise<Cart[]> {
+        return new Promise((resolve, reject) => {
+            db.all(
+                `SELECT carts.*, users.username FROM carts JOIN users ON carts.customer = users.username WHERE carts.paid = 1 AND users.username = ?`,
+                [username],
+                async (err, rows: any[]) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    try {
+                        const carts: Cart[] = [];
+                        for (const row of rows) {
+                            const cart = new Cart(row.customer, row.paid, row.paymentDate, row.total, []);
+                            const productsInCart = await new Promise<ProductInCart[]>((resolve, reject) => {
+                                db.all(
+                                    `SELECT * FROM productsInCart WHERE cartId = ?`,
+                                    [row.id],
+                                    (err, productRows: ProductInCart[]) => {
+                                        if (err) return reject(err);
+                                        resolve(productRows);
+                                    }
+                                );
+                            });
+                            cart.products = productsInCart.map(
+                                (r) => new ProductInCart(r.model, r.quantity, r.category, r.price)
+                            );
+                            carts.push(cart);
+                        }
+                        resolve(carts);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }
+            );
+        });
+    }
 }
 
 export default CartDAO;

@@ -99,10 +99,16 @@ class CartRoutes {
          */
         this.router.get(
             "/history",
-            (req: any, res: any, next: any) => this.controller.getCustomerCarts(req.user)
-                .then((carts: any /**Cart[] */) => res.status(200).json(carts))
-                .catch((err) => next(err))
-        )
+            (req: any, res: any, next: any) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const carts = await this.controller.getCustomerCarts(req.user);
+                    res.status(200).json(carts);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for removing a product unit from a cart.
