@@ -8,7 +8,8 @@ import { EmptyProductStockError, ProductNotFoundError } from "../errors/productE
 import { Utility } from "../utilities";
 /**
  * Represents a controller for managing shopping carts.
- * All methods of this class must interact with the corresponding DAO class to retrieve or store data.
+ * All methods of this class must interact with the corr
+ * esponding DAO class to retrieve or store data.
  */
 class CartController {
     private dao: CartDAO
@@ -118,7 +119,10 @@ class CartController {
      * @param product The model of the product to remove.
      * @returns A Promise that resolves to `true` if the product was successfully removed.
      */
-    async removeProductFromCart(user: User, product: string) /**Promise<Boolean> */ { }
+    async removeProductFromCart(user: User, productModel: string): Promise<boolean> {
+            await this.dao.removeProductFromCart(user.username, productModel);
+            return true;
+    }
 
 
     /**

@@ -3,8 +3,9 @@ import request from "supertest";
 import { app } from "../../index"
 import CartController from "../../src/controllers/cartController";
 import { Cart } from "../../src/components/cart";
-import { CartNotFoundError,  EmptyCartError } from "../../src/errors/cartError";
+import { CartNotFoundError,  EmptyCartError, ProductNotInCartError } from "../../src/errors/cartError";
 import Authenticator from "../../src/routers/auth";
+import { stat } from "fs";
 const baseURL = "/ezelectronics"
 
 
@@ -251,6 +252,66 @@ describe("CartRoutes POST /carts", () => {
     test("should return 401 for unauthorized access", async () => {
         jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a Customer", status: 401 }))
         const response = await request(app).post(baseURL + "/carts");
+        expect(response.status).toBe(401);
+    });
+});
+
+describe("CartRoutes POST /carts", () => {
+
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should remove one product unit from the cart", async () => {
+        jest.spyOn(CartController.prototype, "removeProductFromCart").mockResolvedValue(true);
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+
+        const response = await request(app)
+            .delete(baseURL + "/carts/products/product1")
+            .send({ username: "testuser" });
+        expect(response.status).toBe(200);
+        expect(response.body).toBe(true);
+    });
+
+    test("should return 404 if the cart does not exist", async () => {
+        jest.spyOn(CartController.prototype, "removeProductFromCart").mockRejectedValue(new CartNotFoundError());
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+
+        const response = await request(app)
+            .delete(baseURL + "/carts/products/product1")
+            .send({ username: "testuser" });
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ error: "Cart not found", status: 404 });
+    });
+
+    test("should return 404 if the product is not in the cart", async () => {
+        jest.spyOn(CartController.prototype, "removeProductFromCart").mockRejectedValue(new ProductNotInCartError());
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+
+        const response = await request(app)
+            .delete(baseURL + "/carts/products/product1")
+            .send({ username: "testuser" });
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual({ error: "Product not in cart", status: 404 });
+    });
+
+    test("should return 500 if removal fails", async () => {
+        jest.spyOn(CartController.prototype, "removeProductFromCart").mockRejectedValue(new Error("Failed to remove product"));
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+
+        const response = await request(app)
+            .delete(baseURL + "/carts/products/product1")
+            .send({ username: "testuser" });
+        expect(response.status).toBe(503);
+    });
+
+    test("should return 401 for unauthorized access", async () => {
+        const response = await request(app).delete(baseURL + "/carts/products/product1");
         expect(response.status).toBe(401);
     });
 });

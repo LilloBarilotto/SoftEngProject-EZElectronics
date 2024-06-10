@@ -3,10 +3,8 @@ import CartDAO from "./../../src/dao/cartDAO";
 import db from "./../../src/db/db";
 import {Cart, ProductInCart} from "./../../src/components/cart";
 import {Database} from "sqlite3"
-import {EmptyCartError} from "./../../src/errors/cartError";
+import {EmptyCartError, CartNotFoundError, ProductNotInCartError} from "./../../src/errors/cartError";
 import {Category} from "../../src/components/product";
-
-jest.mock("./../../src/db/db");
 
 jest.mock("./../../src/db/db");
 
@@ -285,5 +283,53 @@ describe("CartDAO addProductToCart", () => {
 
         await dao.addProductToCart(customer, product);
         expect(db.run).toHaveBeenCalled();
+    });
+});
+
+describe("CartDAO getAllCarts", () => {
+    let dao: CartDAO;
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        dao = new CartDAO();
+        jest.resetAllMocks();
+    });
+
+
+    test("should remove one product unit from the cart", async () => {
+        const product = new ProductInCart("product1", 1, Category.APPLIANCE, 50);
+        const cart: Cart = { customer: "testuser", paid: false, paymentDate: "", total: 100, products: [product] };
+
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
+
+        await dao.removeProductFromCart("testuser", "product1");
+        expect(db.run).toHaveBeenCalledTimes(2);
+    });
+
+    test("should throw CartNotFoundError if the cart does not exist", async () => {
+        jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
+            callback(null, null);
+            return {} as Database;
+        });
+
+        await expect(dao.removeProductFromCart("testuser", "product1")).rejects.toThrow(CartNotFoundError);
+    });
+
+    test("should throw ProductNotInCartError if the product is not in the cart", async () => {
+
+
+        jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
+            callback(null, { id: 1, customer: "testuser", paid: false, paymentDate: "", total: 100 });
+            return {} as Database;
+        });
+
+        jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, [{ cartId: 1, model: "product2", quantity: 1, category: "Electronics", price: 50 }]);
+            return {} as Database;
+        });
+
+        await expect(dao.removeProductFromCart("testuser", "product1")).rejects.toThrow(ProductNotInCartError);
     });
 });

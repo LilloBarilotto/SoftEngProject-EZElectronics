@@ -4,7 +4,7 @@ import CartDAO from "./../../src/dao/cartDAO";
 import { CallTracker } from "assert";
 import { User, Role  } from "./../../src/components/user";
 import {Cart} from "./../../src/components/cart"
-import { CartNotFoundError, EmptyCartError } from "./../../src/errors/cartError";
+import { CartNotFoundError, EmptyCartError, ProductNotInCartError } from "./../../src/errors/cartError";
 import { Category, Product } from "../../src/components/product";
 import ProductController from "../../src/controllers/productController";
 import { EmptyProductStockError, ProductNotFoundError } from "../../src/errors/productError";
@@ -287,5 +287,53 @@ describe("CartController addToCart", () => {
         jest.spyOn(ProductController.prototype, "getAvailableProducts").mockResolvedValue([]);
 
         await expect(controller.addToCart(user, productModel)).rejects.toThrow(ProductNotFoundError);
+    });
+});
+
+describe("CartController getAllCarts", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    const user: User = {
+        username: "testuser", role: Role.CUSTOMER,
+        name: "test",
+        surname: "test",
+        address: "test",
+        birthdate: "test"
+    };
+
+
+    test("should remove one product unit from the cart", async () => {
+        const controller: CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "removeProductFromCart").mockResolvedValue();
+
+        const result = await controller.removeProductFromCart(user, "product1");
+        expect(result).toBe(true);
+        expect(CartDAO.prototype.removeProductFromCart).toHaveBeenCalledWith(user.username, "product1");
+    });
+
+    test("should throw CartNotFoundError if the cart does not exist", async () => {
+        const controller: CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "removeProductFromCart").mockRejectedValue(new CartNotFoundError());
+
+        await expect(controller.removeProductFromCart(user, "product1")).rejects.toThrow(CartNotFoundError);
+        expect(CartDAO.prototype.removeProductFromCart).toHaveBeenCalledWith(user.username, "product1");
+    });
+
+    test("should throw ProductNotInCartError if the product is not in the cart", async () => {
+        const controller: CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "removeProductFromCart").mockRejectedValue(new ProductNotInCartError());
+
+        await expect(controller.removeProductFromCart(user, "product1")).rejects.toThrow(ProductNotInCartError);
+        expect(CartDAO.prototype.removeProductFromCart).toHaveBeenCalledWith(user.username, "product1");
+    });
+
+    test("should throw an error if removal fails", async () => {
+        const controller: CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "removeProductFromCart").mockRejectedValue(new Error("Failed to remove product"));
+
+        await expect(controller.removeProductFromCart(user, "product1")).rejects.toThrow("Failed to remove product");
+        expect(CartDAO.prototype.removeProductFromCart).toHaveBeenCalledWith(user.username, "product1");
     });
 });
