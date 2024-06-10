@@ -137,10 +137,17 @@ class CartRoutes {
          */
         this.router.delete(
             "/",
-            (req: any, res: any, next: any) => this.controller.deleteAllCarts()
-                .then(() => res.status(200).end())
-                .catch((err: any) => next(err))
-        )
+            (req, res, next) => this.authenticator.isAdminOrManager(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const result = await this.controller.deleteAllCarts();
+                    res.status(200).json(result);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
+    
 
         /**
          * Route for retrieving all carts of all users
