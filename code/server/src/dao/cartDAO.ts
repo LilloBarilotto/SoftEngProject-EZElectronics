@@ -1,7 +1,7 @@
 import db from "../db/db";
 import { Cart, ProductInCart } from "../components/cart";
 import { Category } from "../components/product";
-import { CartNotFoundError } from "../errors/cartError";
+import { CartNotFoundError, EmptyCartError } from "../errors/cartError";
 import { Utility } from "../utilities";
 
 /**
@@ -116,6 +116,24 @@ class CartDAO {
                 }
             );
         });
+    }
+
+    async checkoutCart(customer: string): Promise<void> {
+        const cart = await this.getCart(customer);
+        if (!cart || Utility.isEmpty(cart)) {
+            throw new CartNotFoundError();
+        }
+
+        if (cart.products.length === 0) {
+            throw new EmptyCartError();
+        }
+
+        cart.paid = true;
+        cart.paymentDate = new Date().toISOString();
+        await db.run(
+            `UPDATE carts SET paid = ?, paymentDate = ? WHERE id = ?`,
+            [cart.paid, cart.paymentDate, cart.id]
+        );
     }
 }
 

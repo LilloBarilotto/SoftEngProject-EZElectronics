@@ -29,8 +29,6 @@ class Utility {
     static isEmpty(cart: Cart): boolean {
         return !cart.paid && cart.paymentDate === "" && cart.total === 0 && cart.products.length === 0;
     }
-
-
 }
 
 class DateError extends Error {
