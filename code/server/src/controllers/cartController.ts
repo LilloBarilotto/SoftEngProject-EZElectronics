@@ -1,6 +1,7 @@
 import { User } from "../components/user";
+import { Cart } from "../components/cart";
 import CartDAO from "../dao/cartDAO";
-
+import { CartNotFoundError, ProductInCartError, ProductNotInCartError, EmptyCartError } from "../errors/cartError";
 /**
  * Represents a controller for managing shopping carts.
  * All methods of this class must interact with the corresponding DAO class to retrieve or store data.
@@ -28,7 +29,13 @@ class CartController {
      * @param user - The user for whom to retrieve the cart.
      * @returns A Promise that resolves to the user's cart or an empty one if there is no current cart.
      */
-    async getCart(user: User)/*: Cart*/ { }
+    async getCart(user: User): Promise<Cart> {
+            const cart = await this.dao.getCart(user.username);
+            if (!cart) {
+                throw new CartNotFoundError();
+            }
+            return cart;
+    }
 
     /**
      * Checks out the user's cart. We assume that payment is always successful, there is no need to implement anything related to payment.
