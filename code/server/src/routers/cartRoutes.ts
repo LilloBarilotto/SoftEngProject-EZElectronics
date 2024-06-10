@@ -85,12 +85,16 @@ class CartRoutes {
          */
         this.router.patch(
             "/",
-            (req: any, res: any, next: any) => this.controller.checkoutCart(req.user)
-                .then(() => res.status(200).end())
-                .catch((err) => {
-                    next(err)
-                })
-        )
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const result = await this.controller.checkoutCart(req.user);
+                    res.status(200).json(result);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for getting the history of the logged in customer's carts.

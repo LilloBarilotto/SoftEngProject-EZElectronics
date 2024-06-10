@@ -1,16 +1,22 @@
+import { LowProductStockError } from "../errors/productError";
 import { User } from "../components/user";
 import { Cart, ProductInCart } from "../components/cart";
 import CartDAO from "../dao/cartDAO";
 import { CartNotFoundError, ProductInCartError, ProductNotInCartError, EmptyCartError } from "../errors/cartError";
+import ProductController from "./productController";
+import { EmptyProductStockError } from "../errors/productError";
+import { Utility } from "../utilities";
 /**
  * Represents a controller for managing shopping carts.
  * All methods of this class must interact with the corresponding DAO class to retrieve or store data.
  */
 class CartController {
     private dao: CartDAO
+    private productController: ProductController
 
     constructor() {
         this.dao = new CartDAO
+        this.productController = new ProductController
     }
 
     /**
@@ -43,7 +49,42 @@ class CartController {
      * @returns A Promise that resolves to `true` if the cart was successfully checked out.
      * 
      */
-    async checkoutCart(user: User) /**Promise<Boolean> */ { }
+
+
+    async checkoutCart(user: User): Promise<boolean> {
+        try {
+            const cart = await this.dao.getCart(user.username);
+            if (!cart || Utility.isEmpty(cart)) {
+                throw new CartNotFoundError();
+            }
+            if (cart.products.length === 0) {
+                throw new EmptyCartError();
+            }
+
+            for (const productInCart of cart.products) {
+                const product = await this.productController.getProducts("model", null, productInCart.model);
+                if (!product || product.length === 0) {
+                    throw new Error(`Product ${productInCart.model} not found`);
+                }
+                const availableProduct = product[0];
+                if (availableProduct.quantity === 0) {
+                    throw new EmptyProductStockError();
+                }
+                if (productInCart.quantity > availableProduct.quantity) {
+                    throw new LowProductStockError();
+                }
+            }
+
+            await this.dao.checkoutCart(user.username);
+            return true;
+        } catch (error) {
+            if (error instanceof CartNotFoundError || error instanceof EmptyCartError || error instanceof EmptyProductStockError || error instanceof LowProductStockError) {
+                throw error;
+            }
+            throw new Error("Unexpected error during checkout");
+        }
+    }
+
 
     /**
      * Retrieves all paid carts for a specific customer.

@@ -1,9 +1,13 @@
-import {  beforeEach, describe, jest, afterEach, test, expect } from "@jest/globals";
+import {afterEach, beforeEach, describe, expect, jest, test} from "@jest/globals";
 import CartDAO from "./../../src/dao/cartDAO";
 import db from "./../../src/db/db";
-import { Cart, ProductInCart } from "./../../src/components/cart";
+import {Cart, ProductInCart} from "./../../src/components/cart";
 import {Database} from "sqlite3"
-import { CartNotFoundError } from "../../src/errors/cartError";
+import {EmptyCartError} from "./../../src/errors/cartError";
+import {Category} from "../../src/components/product";
+
+jest.mock("./../../src/db/db");
+
 jest.mock("./../../src/db/db");
 
 describe("CartDAO deleteAllCarts", () => {
@@ -13,6 +17,7 @@ describe("CartDAO deleteAllCarts", () => {
         dao = new CartDAO();
     });
     afterEach(() => {
+        jest.resetAllMocks();
         jest.restoreAllMocks();
     });
 
@@ -36,6 +41,7 @@ describe("CartDAO clearCart", () => {
         dao = new CartDAO();
     });
     afterEach(() => {
+        jest.resetAllMocks();
         jest.restoreAllMocks();
     });
     test("should clear the cart if it exists", async () => {
@@ -62,6 +68,7 @@ describe("CartDAO clearCart", () => {
 describe("CartDAO getCartsAll", () => {
     let dao: CartDAO;
     afterEach(() => {
+        jest.resetAllMocks();
         jest.restoreAllMocks();
     });
     beforeEach(() => {
@@ -102,6 +109,7 @@ describe("CartDAO getCartsAll", () => {
 describe("CartDAO getAllCarts", () => {
     let dao: CartDAO;
     afterEach(() => {
+        jest.resetAllMocks();
         jest.restoreAllMocks();
     });
     beforeEach(() => {
@@ -148,5 +156,88 @@ describe("CartDAO getAllCarts", () => {
         });
 
         await expect(dao.getAllCarts("testuser")).rejects.toThrow("Failed to retrieve carts");
+    });
+});
+
+describe("CartDAO checkoutCart", () => {
+    let dao: CartDAO;
+
+    beforeEach(() => {
+        dao = new CartDAO();
+    });
+
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("should checkout the cart if it exists and has products", async () => {
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(new Cart(
+            "testuser", false, "", 100, [new ProductInCart("product1", 1, Category.SMARTPHONE, 50)], 1
+        ));
+
+        await dao.checkoutCart("testuser");
+
+        expect(db.run).toHaveBeenCalledWith(
+            `UPDATE carts SET paid = ?, paymentDate = ? WHERE id = ?`,
+            [true, expect.any(String), 1]
+        );
+        expect(db.run).toBeCalledTimes(1);
+    });
+
+
+
+    test("should throw EmptyCartError if the cart is empty", async () => {
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(new Cart(
+            "testuser", false, "", 100, [], 1
+        ));
+
+        await expect(dao.checkoutCart("testuser")).rejects.toThrow(EmptyCartError);
+    });
+});
+
+describe("CartDAO getCart", () => {
+    let dao: CartDAO;
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+    beforeEach(() => {
+        dao = new CartDAO();
+
+    });
+
+    test("Should return a cart if it exists", async () => {
+        const cartRow = { id: 1, customer: "testuser", paid: false, paymentDate: "", total: 100 };
+        const productRows = [{ cartId: 1, model: "product1", quantity: 2, category: "Electronics", price: 50 }];
+
+        jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
+            callback(null, cartRow);
+            return {} as Database
+        });
+
+        jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, productRows);
+            return {} as Database
+        });
+
+        const cart = await dao.getCart("testuser");
+        expect(cart).toEqual({
+            customer: "testuser",
+            paid: false,
+            paymentDate: "",
+            total: 100,
+            products: [{ model: "product1", quantity: 2, category: "Electronics", price: 50 }]
+        });
+    });
+
+    test("Should return empty cart object if the cart does not exist", async () => {
+        jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
+            callback(null, null);
+            return {} as Database
+        });
+
+        const cart = await dao.getCart("testuser");
+        expect(cart).toEqual({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []});
     });
 });

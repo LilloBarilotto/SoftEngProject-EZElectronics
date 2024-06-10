@@ -2,9 +2,12 @@ import {describe, afterEach, beforeEach, test, expect, jest } from "@jest/global
 import CartController from "./../../src/controllers/cartController";
 import CartDAO from "./../../src/dao/cartDAO";
 import { CallTracker } from "assert";
-import { CartNotFoundError } from "./../../src/errors/cartError";
 import { User, Role  } from "./../../src/components/user";
 import {Cart} from "./../../src/components/cart"
+import { CartNotFoundError, EmptyCartError } from "./../../src/errors/cartError";
+import { Category, Product } from "../../src/components/product";
+import ProductController from "../../src/controllers/productController";
+
 
 jest.mock("./../../src/dao/cartDAO");
 
@@ -133,5 +136,109 @@ describe("CartController getAllCarts", () => {
 
         await expect(controller.getCustomerCarts(user)).rejects.toThrow("Failed to retrieve carts");
         expect(CartDAO.prototype.getAllCarts).toHaveBeenCalledWith(user.username);
+    });
+});
+
+describe("CartController checkoutCart", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+
+    test("should checkout the cart if it exists and has products", async () => {
+        const controller : CartController =  new CartController;
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const cart: Cart = { customer: "testuser", paid: false, paymentDate: "", total: 120,
+            products: [{model: "iphone14", quantity: 1, category: Category.SMARTPHONE, price: 120}] };
+
+        jest.spyOn(ProductController.prototype, "getProducts")
+            .mockResolvedValue([{sellingPrice: 120, model: "iphone14", category: Category.SMARTPHONE, arrivalDate: null, details: null, quantity: 12 }]);
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
+        jest.spyOn(CartDAO.prototype, "checkoutCart").mockResolvedValue();
+
+        const result = await controller.checkoutCart(user);
+        expect(result).toBe(true);
+        expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
+        expect(CartDAO.prototype.checkoutCart).toHaveBeenCalledWith(user.username);
+    });
+
+    test("should throw CartNotFoundError if the cart does not exist", async () => {
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const controller : CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(null);
+
+        await expect(controller.checkoutCart(user)).rejects.toThrow(CartNotFoundError);
+        expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
+        expect(CartDAO.prototype.checkoutCart).not.toHaveBeenCalled();
+    });
+
+    test("should throw EmptyCartError if the cart is empty", async () => {
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const cart: Cart = { customer: "testuser", paid: false, paymentDate: "", total: 100, products: [] };
+        const controller : CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
+
+        await expect(controller.checkoutCart(user)).rejects.toThrow(EmptyCartError);
+        expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
+        expect(CartDAO.prototype.checkoutCart).not.toHaveBeenCalled();
+    });
+});
+
+describe("CartController getCart", () => {
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test("Should return a cart if it exists", async () => {
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const controller : CartController =  new CartController;
+        const cart: Cart = { customer: "testuser", paid: false, paymentDate: "", total: 100, products: [] };
+
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
+
+        const result = await controller.getCart(user);
+        expect(result).toEqual(cart);
+        expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
+    });
+
+    test("should return an empty Cart if the cart does not exist", async () => {
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const controller : CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []});
+
+        const result =  await  controller.getCart(user);
+        expect(result).toEqual({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []})
+        expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
     });
 });
