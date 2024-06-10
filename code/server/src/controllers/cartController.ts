@@ -67,8 +67,10 @@ class CartController {
      * @param user - The user who owns the cart.
      * @returns A Promise that resolves to `true` if the cart was successfully cleared.
      */
-    async clearCart(user: User)/*:Promise<Boolean> */ { }
-
+    async clearCart(user: User): Promise<boolean> {
+        await this.dao.clearCart(user.username);
+        return true;
+    }
     /**
      * Deletes all carts of all users.
      * @returns A Promise that resolves to `true` if all carts were successfully deleted.

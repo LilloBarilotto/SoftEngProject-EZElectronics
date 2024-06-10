@@ -1,3 +1,4 @@
+import { Cart } from "./components/cart"
 import { User, Role } from "./components/user"
 const DATE_ERROR = "Input date is not compatible with the current date"
 
@@ -25,6 +26,10 @@ class Utility {
     static isAdmin(user: User): boolean {
         return user.role === Role.ADMIN
     }
+    static isEmpty(cart: Cart): boolean {
+        return !cart.paid && cart.paymentDate === "" && cart.total === 0 && cart.products.length === 0;
+    }
+
 
 }
 

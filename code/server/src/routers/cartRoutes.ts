@@ -127,10 +127,16 @@ class CartRoutes {
          */
         this.router.delete(
             "/current",
-            (req: any, res: any, next: any) => this.controller.clearCart(req.user)
-                .then(() => res.status(200).end())
-                .catch((err) => next(err))
-        )
+            (req: any, res: any, next: any) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const result = await this.controller.clearCart(req.user);
+                    res.status(200).json(result);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for deleting all carts.

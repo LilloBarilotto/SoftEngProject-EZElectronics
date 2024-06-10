@@ -1,6 +1,8 @@
 import db from "../db/db";
 import { Cart, ProductInCart } from "../components/cart";
 import { Category } from "../components/product";
+import { CartNotFoundError } from "../errors/cartError";
+import { Utility } from "../utilities";
 
 /**
  * A class that implements the interaction with the database for all cart-related operations.
@@ -53,6 +55,18 @@ class CartDAO {
         } catch (error) {
             throw error;
         }
+    }
+
+    async clearCart(customer: string): Promise<void> {
+        const cart = await this.getCart(customer);
+        if (!cart || Utility.isEmpty(cart)) {
+            throw new CartNotFoundError();
+        }
+
+        cart.products = [];
+        cart.total = 0;
+        await db.run(`DELETE FROM productsInCart WHERE cartId = ?`, [cart.id]);
+        await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
 }
 
