@@ -1,5 +1,5 @@
 import { User } from "../components/user";
-import { Cart } from "../components/cart";
+import { Cart, ProductInCart } from "../components/cart";
 import CartDAO from "../dao/cartDAO";
 import { CartNotFoundError, ProductInCartError, ProductNotInCartError, EmptyCartError } from "../errors/cartError";
 /**
@@ -88,7 +88,14 @@ class CartController {
      * Retrieves all carts in the database.
      * @returns A Promise that resolves to an array of carts.
      */
-    async getAllCarts() /*:Promise<Cart[]> */ { }
+    async getAllCarts(): Promise<Cart[]> {
+        try {
+            const carts = await this.dao.getCartsAll();
+            return carts;
+        } catch (error) {
+            throw new Error("Failed to retrieve all carts");
+        }
+    }
 }
 
 export default CartController

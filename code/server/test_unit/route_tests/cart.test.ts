@@ -7,7 +7,7 @@ import { CartNotFoundError } from "../../src/errors/cartError";
 import Authenticator from "../../src/routers/auth";
 const baseURL = "/ezelectronics"
 
-    
+
 
 describe("CartRoutes DELETE /carts", () => {
     let controller: CartController;
@@ -55,6 +55,43 @@ describe("CartRoutes DELETE /carts/current", () => {
         jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a Customer", status: 401 }))
         jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
         const response = await request(app).delete(baseURL + "/carts/current");
+        expect(response.status).toBe(401);
+    });
+});
+
+describe("CartRoutes GET /carts", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should retrieve all carts", async () => {
+        const carts: Cart[] = [
+            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
+            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
+        ];
+
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(CartController.prototype, "getAllCarts").mockResolvedValue(carts);
+
+        const response = await request(app)
+            .get(baseURL  + "/carts/all")
+            .send();
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual(carts);
+    });
+
+    test("should return 503 if retrieval fails", async () => {
+        jest.spyOn(CartController.prototype, "getAllCarts").mockRejectedValue(new Error("Failed to retrieve all carts"));
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app)
+            .get(baseURL + "/carts/all")
+            .send();
+        expect(response.status).toBe(503);
+        expect(response.body).toEqual({ error: "Internal Server Error", status: 503 });
+    });
+
+    test("should return 401 for unauthorized access", async () => {
+        const response = await request(app).get(baseURL + "/carts/all");
         expect(response.status).toBe(401);
     });
 });

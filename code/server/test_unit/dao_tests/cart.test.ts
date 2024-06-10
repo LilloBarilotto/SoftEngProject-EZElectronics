@@ -58,3 +58,43 @@ describe("CartDAO clearCart", () => {
         expect(db.run).toHaveBeenCalled();
     });
 });
+
+describe("CartDAO getAllCarts", () => {
+    let dao: CartDAO;
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+    beforeEach(() => {
+        dao = new CartDAO();
+
+    });
+
+    test("should retrieve all carts", async () => {
+        const carts: Cart[] = [
+            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
+            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
+        ];
+
+
+        jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, carts);
+            return {} as Database
+        });
+
+        const result = await dao.getCartsAll();
+        expect(result).toEqual([
+            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
+            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
+        ]);
+        expect(db.all).toHaveBeenCalledWith(`SELECT * FROM carts`, [], expect.any(Function));
+    });
+
+    test("should throw an error if retrieval fails", async () => {
+        jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(new Error("Failed to retrieve all carts"));
+            return {} as Database
+        });
+
+        await expect(dao.getCartsAll()).rejects.toThrow("Failed to retrieve all carts");
+    });
+});

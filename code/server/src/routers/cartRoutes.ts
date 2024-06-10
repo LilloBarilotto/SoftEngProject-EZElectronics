@@ -164,10 +164,16 @@ class CartRoutes {
          */
         this.router.get(
             "/all",
-            (req: any, res: any, next: any) => this.controller.getAllCarts()
-                .then((carts: any/**Cart[] */) => res.status(200).json(carts))
-                .catch((err: any) => next(err))
-        )
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const carts = await this.controller.getAllCarts();
+                    res.status(200).json(carts);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
     }
 }
 

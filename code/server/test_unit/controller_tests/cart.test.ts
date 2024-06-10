@@ -72,3 +72,30 @@ describe("CartController clearCart", () => {
         expect(CartDAO.prototype.clearCart).toHaveBeenCalledWith(user.username);
     });
 });
+
+describe("CartController getAllCarts", () => {
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+
+    test("should retrieve all carts", async () => {
+        const carts: Cart[] = [
+            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
+            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
+        ];
+        const controller: CartController =  new CartController;
+        jest.spyOn(CartDAO.prototype, "getCartsAll").mockResolvedValue(carts);
+
+        const result = await controller.getAllCarts();
+        expect(result).toEqual(carts);
+        expect(CartDAO.prototype.getCartsAll).toHaveBeenCalled();
+    });
+
+    test("should throw an error if retrieval fails", async () => {
+        jest.spyOn(CartDAO.prototype, "getCartsAll").mockRejectedValue(new Error("Failed to retrieve all carts"));
+        const controller: CartController =  new CartController;
+        await expect(controller.getAllCarts()).rejects.toThrow("Failed to retrieve all carts");
+        expect(CartDAO.prototype.getCartsAll).toHaveBeenCalled();
+    });
+});
