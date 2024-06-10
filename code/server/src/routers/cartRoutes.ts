@@ -127,12 +127,18 @@ class CartRoutes {
          */
         this.router.delete(
             "/products/:model",
-            (req: any, res: any, next: any) => this.controller.removeProductFromCart(req.user, req.params.model)
-                .then(() => res.status(200).end())
-                .catch((err) => {
-                    next(err)
-                })
-        )
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            param("model").isString().notEmpty(),
+	        (req, res, next) => this.errorHandler.validateRequest(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const result = await this.controller.removeProductFromCart(req.user, req.params.model);
+                    res.status(200).json(result);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for removing all products from the current cart.

@@ -1,7 +1,7 @@
 import db from "../db/db";
 import { Cart, ProductInCart } from "../components/cart";
 import { Category } from "../components/product";
-import { CartNotFoundError, EmptyCartError } from "../errors/cartError";
+import { CartNotFoundError, EmptyCartError, ProductNotInCartError } from "../errors/cartError";
 import { Utility } from "../utilities";
 
 /**
@@ -166,6 +166,33 @@ class CartDAO {
         }
 
         cart.total += product.price;
+        await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
+    }
+
+    async removeProductFromCart(customer: string, productModel: string): Promise<void> {
+        const cart = await this.getCart(customer);
+        if (!cart || Utility.isEmpty(cart)) {
+            throw new CartNotFoundError();
+        }
+
+        const productIndex = cart.products.findIndex((p) => p.model === productModel);
+        if (productIndex === -1) {
+            throw new ProductNotInCartError();
+        }
+
+        const product = cart.products[productIndex];
+        if (product.quantity > 1) {
+            product.quantity -= 1;
+            await db.run(
+                `UPDATE productsInCart SET quantity = ? WHERE cartId = ? AND model = ?`,
+                [product.quantity, cart.id, product.model]
+            );
+        } else {
+            cart.products.splice(productIndex, 1);
+            await db.run(`DELETE FROM productsInCart WHERE cartId = ? AND model = ?`, [cart.id, product.model]);
+        }
+
+        cart.total -= product.price;
         await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
 }
