@@ -70,12 +70,17 @@ class CartRoutes {
          */
         this.router.post(
             "/",
-            (req: any, res: any, next: any) => this.controller.addToCart(req.user, req.body.model)
-                .then(() => res.status(200).end())
-                .catch((err) => {
-                    next(err)
-                })
-        )
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            body("model").isString().notEmpty(),
+            (req, res, next) => this.errorHandler.validateRequest(req, res, next),
+            (req: any, res: any, next: any) => {
+                this.controller.addToCart(req.user, req.body.model)
+                    .then(() => res.status(200).end())
+                    .catch((err) => {
+                        next(err);
+                    });
+            }
+        );
 
         /**
          * Route for checking out the cart of the logged in customer.

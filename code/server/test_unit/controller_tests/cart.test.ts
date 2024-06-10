@@ -7,7 +7,7 @@ import {Cart} from "./../../src/components/cart"
 import { CartNotFoundError, EmptyCartError } from "./../../src/errors/cartError";
 import { Category, Product } from "../../src/components/product";
 import ProductController from "../../src/controllers/productController";
-
+import { EmptyProductStockError, ProductNotFoundError } from "../../src/errors/productError";
 
 jest.mock("./../../src/dao/cartDAO");
 
@@ -240,5 +240,52 @@ describe("CartController getCart", () => {
         const result =  await  controller.getCart(user);
         expect(result).toEqual({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []})
         expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
+    });
+});
+
+describe("CartController addToCart", () => {
+    let controller: CartController;
+
+    beforeEach(() => {
+        controller = new CartController();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
+    });
+
+    test("should add a product to the cart if the cart exists", async () => {
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const productController =  new ProductController();
+        const productModel = "product1";
+        const productDetails = [{ model: "product1", category: Category.APPLIANCE, sellingPrice: 50, quantity: 1, arrivalDate: "2024-05-19", details: "details" }];
+
+        jest.spyOn(ProductController.prototype, "getAvailableProducts").mockResolvedValue(productDetails);
+        jest.spyOn(CartDAO.prototype, "addProductToCart").mockResolvedValue();
+
+        const result = await controller.addToCart(user, productModel);
+        expect(result).toBe(true);
+        expect(CartDAO.prototype.addProductToCart).toHaveBeenCalledWith(user.username, expect.any(Object));
+    });
+
+    test("should throw an error if the product does not exist", async () => {
+        const user: User = {
+            username: "testuser", role: Role.CUSTOMER,
+            name: "test",
+            surname: "test",
+            address: "test",
+            birthdate: "test"
+        };
+        const productModel = "nonexistent";
+
+        jest.spyOn(ProductController.prototype, "getAvailableProducts").mockResolvedValue([]);
+
+        await expect(controller.addToCart(user, productModel)).rejects.toThrow(ProductNotFoundError);
     });
 });

@@ -218,3 +218,39 @@ describe("CartRoutes GET /carts", () => {
         expect(response.status).toBe(401);
     });
 });
+
+describe("CartRoutes POST /carts", () => {
+
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("should add a product to the cart", async () => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+
+        jest.spyOn(CartController.prototype, "addToCart").mockResolvedValue(true);
+
+        const response = await request(app)
+            .post(baseURL + "/carts")
+            .send({ model: "product1" });
+        console.log(response);
+        expect(response.status).toBe(200);
+    });
+
+    test("should return 422 if product model is not provided", async () => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app)
+            .post(baseURL + "/carts")
+            .send({});
+        expect(response.status).toBe(422);
+    });
+
+    test("should return 401 for unauthorized access", async () => {
+        jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a Customer", status: 401 }))
+        const response = await request(app).post(baseURL + "/carts");
+        expect(response.status).toBe(401);
+    });
+});
