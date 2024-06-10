@@ -135,6 +135,39 @@ class CartDAO {
             [cart.paid, cart.paymentDate, cart.id]
         );
     }
+
+    async createCart(customer: string): Promise<Cart> {
+        const newCart = new Cart(customer, false, "", 0, []);
+        await db.run(
+            `INSERT INTO carts (customer, paid, paymentDate, total) VALUES (?, ?, ?, ?)`,
+            [newCart.customer, newCart.paid, newCart.paymentDate, newCart.total]
+        );
+        return newCart;
+    }
+
+
+    async addProductToCart(customer: string, product: ProductInCart): Promise<void> {
+        const cart = await this.getCart(customer) ?? await this.createCart(customer);
+
+        const existingProduct = cart.products.find((p) => p.model === product.model);
+        //if product is already present in user's cart, increment the quantity of the product in the cart
+        if (existingProduct) {
+            existingProduct.quantity += 1;
+            await db.run(
+                `UPDATE productsInCart SET quantity = ? WHERE cartId = ? AND model = ?`,
+                [existingProduct.quantity, cart.id, product.model]
+            );
+        } else {
+            cart.products.push(product);
+            await db.run(
+                `INSERT INTO productsInCart (cartId, model, quantity, category, price) VALUES (?, ?, ?, ?, ?)`,
+                [cart.id, product.model, product.quantity, product.category, product.price]
+            );
+        }
+
+        cart.total += product.price;
+        await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
+    }
 }
 
 export default CartDAO;

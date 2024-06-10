@@ -241,3 +241,49 @@ describe("CartDAO getCart", () => {
         expect(cart).toEqual({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []});
     });
 });
+
+describe("CartDAO addProductToCart", () => {
+    let dao: CartDAO;
+
+    beforeEach(() => {
+        dao = new CartDAO();
+    });
+
+    test("should add a product to an existing cart", async () => {
+        const customer = "testuser";
+        const product = new ProductInCart("product1", 1, Category.APPLIANCE, 50);
+        const cart = new Cart(customer, false, "", 100, [product]);
+
+        jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
+            callback(null, { id: 1, customer: "testuser", paid: false, paymentDate: "", total: 100 });
+
+            return {} as Database
+        });
+
+        jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
+            callback(null, [{ cartId: 1, model: "product1", quantity: 1, category: Category.APPLIANCE, price: 50 }]);
+            return {} as Database
+        });
+
+
+
+        await dao.addProductToCart(customer, product);
+        expect(db.run).toHaveBeenCalled();
+    });
+
+    test("should create a new cart and add the product if the cart does not exist", async () => {
+        const customer = "testuser";
+        const product = new ProductInCart("product1", 1, Category.APPLIANCE, 50);
+
+        jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
+            callback(null, null);
+
+            return {} as Database
+        });
+
+
+
+        await dao.addProductToCart(customer, product);
+        expect(db.run).toHaveBeenCalled();
+    });
+});
