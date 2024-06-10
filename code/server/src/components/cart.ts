@@ -56,3 +56,4 @@ class ProductInCart {
 }
 
 export { Cart, ProductInCart }
+
