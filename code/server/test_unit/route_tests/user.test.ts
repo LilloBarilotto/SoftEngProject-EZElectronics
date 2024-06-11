@@ -2,10 +2,9 @@ import { test, expect, jest , afterEach, describe} from "@jest/globals"
 import request from 'supertest'
 import { app } from "../../index"
 
-import UserController from "../../src/controllers/userController"
-
-import { User, Role } from "../../src/components/user"
 import Authenticator from "../../src/routers/auth"
+import UserController from "../../src/controllers/userController"
+import { User, Role } from "../../src/components/user"
 import {UserNotFoundError} from "../../src/errors/userError"
 
 const baseURL = "/ezelectronics"
@@ -220,5 +219,65 @@ describe("PATCH /ezelectronics/users/:username", () => {
         expect(response.status).toBe(401); //Check if the response status is 401
         expect(UserController.prototype.getUserByUsername).toHaveBeenCalledTimes(0); //Check if the getUserByUsername method has not been called
         expect(response.body).toEqual({ error: "Unauthenticated user", status: 401 });
+    });
+});
+
+describe("DELETE /ezelectronics/users", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+    test("It should return a 200 success code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdmin").mockImplementation((req, res, next) => next());
+        jest.spyOn(UserController.prototype, "deleteAll").mockResolvedValueOnce(true);
+
+        const response = await request(app).delete(baseURL + "/users");
+        expect(response.status).toBe(200);
+        expect(UserController.prototype.deleteAll).toHaveBeenCalledTimes(1);
+    });
+
+    test("It should return a 401 unauthorized code", async () => {
+        jest.spyOn(Authenticator.prototype, "isAdmin").mockImplementation((req, res, next) => res.status(401).end());
+        jest.spyOn(UserController.prototype, "deleteAll").mockResolvedValueOnce(true);
+
+        const response = await request(app).delete(baseURL + "/users");
+        expect(response.status).toBe(401);
+        expect(UserController.prototype.deleteAll).toHaveBeenCalledTimes(0);
+    });
+});
+
+
+describe("DELETE /ezelectronics/users/:username", () => {
+    const userList : User[] = [
+        new User("username1", "name1", "surname1", Role.ADMIN, "", ""),
+        new User("username2", "name2", "surname2", Role.MANAGER, "", ""),
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", "")
+    ];
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+        jest.resetAllMocks();
+    });
+
+
+    test("should return a 200 success code", async () => {
+        jest.spyOn(UserController.prototype, "deleteUser").mockResolvedValueOnce(true); //Mock the deleteUser method of the controller
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) => next());
+
+        const response = await request(app).delete(baseURL + "/users/username1"); //Send a DELETE request to the route
+
+        expect(response.status).toBe(200); //Check if the response status is 200
+        expect(UserController.prototype.deleteUser).toHaveBeenCalledTimes(1); //Check if the deleteUser method has been called once
+    });
+
+    test("should return a 401 unauthorized code", async () => {
+        jest.spyOn(UserController.prototype, "deleteUser").mockResolvedValueOnce(true); //Mock the deleteUser method of the controller
+        jest.spyOn(Authenticator.prototype, "isAdmin").mockImplementation((req, res, next) => res.status(401).end());
+
+        const response = await request(app).delete(baseURL + "/users/username1"); //Send a DELETE request to the route
+
+        expect(response.status).toBe(401); //Check if the response status is 401
+        expect(UserController.prototype.deleteUser).toHaveBeenCalledTimes(0); //Check if the deleteUser method has not been called
     });
 });

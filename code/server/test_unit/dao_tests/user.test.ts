@@ -131,7 +131,7 @@ describe("getUsersByRole", () => {
 
 
 describe("updateUser", () => {
-    const userTest = 
+    const userTest =
         new User("username3", "name3", "surname3", Role.CUSTOMER, "Via Amerigo 24", "2024-10-11");
 
     afterEach(() => {
@@ -141,17 +141,87 @@ describe("updateUser", () => {
 
     test("It should resolve with a user", async () => {
         const userDAO = new UserDAO()
-    
+
         const mockDBRun = jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
             callback(null)
             return {} as Database
         });
 
         const result = await userDAO.updateUser(userTest.username, userTest.name, userTest.surname, userTest.address, userTest.birthdate, userTest.role);
-        
+
         expect(result).toEqual(userTest);
         expect(mockDBRun).toHaveBeenCalledTimes(1);
         expect(mockDBRun).toHaveBeenCalledWith("UPDATE users SET name = ?, surname = ?, address = ?, birthdate = ? WHERE username = ?", [userTest.name, userTest.surname, userTest.address, userTest.birthdate, userTest.username], expect.any(Function));
     });
 
+});
+
+describe("Delete All users (Non Admin)", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("It should resolve true", async () => {
+        const mockDBRun = jest
+            .spyOn(db, "run")
+            .mockImplementation((sql, params, callback) => {
+                callback(null);
+                return {} as Database;
+            });
+        const userDAO = new UserDAO();
+
+        const result = await userDAO.deleteAllNonAdminUsers();
+        expect(result).toBe(true);
+        expect(mockDBRun).toHaveBeenCalledTimes(1);
+    });
+
+    test("It should reject an error", async () => {
+        const mockDBRun = jest
+            .spyOn(db, "run")
+            .mockImplementation((sql, params, callback) => {
+                callback(new Error());
+                return {} as Database;
+            });
+        const userDAO = new UserDAO();
+        const result = userDAO.deleteAllNonAdminUsers();
+
+        expect(result).rejects.toThrowError();
+        expect(mockDBRun).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe("Delete specific user by username", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("It should resolve true", async () => {
+        const mockDBRun = jest
+            .spyOn(db, "run")
+            .mockImplementation((sql, params, callback) => {
+                callback(null);
+                return {} as Database;
+            });
+        const userDAO = new UserDAO();
+
+        const result = await userDAO.deleteUser("username");
+        expect(result).toBe(true);
+        expect(mockDBRun).toHaveBeenCalledTimes(1);
+    });
+
+    test("It should reject an error", async () => {
+        const mockDBRun = jest
+            .spyOn(db, "run")
+            .mockImplementation((sql, params, callback) => {
+                callback(new Error());
+                return {} as Database;
+            });
+        const userDAO = new UserDAO();
+        const result = userDAO.deleteUser("username");
+
+        expect(result).rejects.toThrowError();
+        expect(mockDBRun).toHaveBeenCalledTimes(1);
+    });
 });
