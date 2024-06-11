@@ -43,7 +43,6 @@ class ReviewRoutes {
             (req: any, res: any, next: any) => this.controller.addReview(req.params.model, req.user, req.body.score, req.body.comment)
                 .then(() => res.status(200).send())
                 .catch((err: Error) => {
-                    console.log(err)
                     next(err)
                 })
         )
@@ -74,7 +73,6 @@ class ReviewRoutes {
             (req: any, res: any, next: any) => this.controller.deleteReview(req.params.model, req.user)
                 .then(() => res.status(200).send())
                 .catch((err: Error) => {
-                    console.log(err)
                     next(err)
                 })
         )
