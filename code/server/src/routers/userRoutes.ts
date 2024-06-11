@@ -101,7 +101,7 @@ class UserRoutes {
         this.router.get(
             "/:username",
             (req: any, res: any, next: any) => this.authService.isLoggedIn(req, res, next),
-            param("username").isString().notEmpty(),
+            param("username").isString().notEmpty({ignore_whitespace: true}),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.getUserByUsername(req.user, req.params.username)
                 .then((user: User ) => res.status(200).json(user))
@@ -146,6 +146,12 @@ class UserRoutes {
          */
         this.router.patch(
             "/:username",
+            (req: any, res: any, next: any) => this.authService.isLoggedIn(req, res, next),
+            body("name").isString().notEmpty({ignore_whitespace: true}),
+            body("surname").isString().notEmpty({ignore_whitespace: true}),
+            body("address").isString().notEmpty({ignore_whitespace: true}),
+            body("birthdate").isDate({ format: 'YYYY-MM-DD' }).notEmpty({ignore_whitespace: true}),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.updateUserInfo(req.user, req.body.name, req.body.surname, req.body.address, req.body.birthdate, req.params.username)
                 .then((user: any /**User */) => res.status(200).json(user))
                 .catch((err: any) => next(err))

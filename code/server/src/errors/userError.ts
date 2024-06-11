@@ -5,6 +5,7 @@ const USER_NOT_CUSTOMER = "This operation can be performed only by a customer"
 const USER_NOT_ADMIN = "This operation can be performed only by an admin"
 const USER_IS_ADMIN = "Admins cannot be deleted"
 const UNAUTHORIZED_USER = "You cannot access the information of other users"
+const BIRTHDATE_AFTER_CURRENT_DATE = "The birthdate must be before the current date"
 
 /**
  * Represents an error that occurs when a user is not found.
@@ -97,4 +98,15 @@ class UnauthorizedUserError extends Error {
     }
 }
 
-export { UserNotFoundError, UserNotManagerError, UserNotCustomerError, UserAlreadyExistsError, UserNotAdminError, UserIsAdminError, UnauthorizedUserError }
+class BirtdateAfterCurrentDateError extends Error {
+    customMessage: String;
+    customCode: Number;
+
+    constructor() {
+        super()
+        this.customMessage = BIRTHDATE_AFTER_CURRENT_DATE
+        this.customCode = 400
+    }
+}
+
+export { BirtdateAfterCurrentDateError, UserNotFoundError, UserNotManagerError, UserNotCustomerError, UserAlreadyExistsError, UserNotAdminError, UserIsAdminError, UnauthorizedUserError }
