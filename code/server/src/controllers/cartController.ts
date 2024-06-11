@@ -6,6 +6,7 @@ import { CartNotFoundError, ProductInCartError, ProductNotInCartError, EmptyCart
 import ProductController from "./productController";
 import { EmptyProductStockError, ProductNotFoundError } from "../errors/productError";
 import { Utility } from "../utilities";
+import dayjs from "dayjs";
 /**
  * Represents a controller for managing shopping carts.
  * All methods of this class must interact with the corr
@@ -90,6 +91,7 @@ class CartController {
                 if (productInCart.quantity > availableProduct.quantity) {
                     throw new LowProductStockError();
                 }
+                 await this.productController.sellProduct(productInCart.model, productInCart.quantity ,dayjs().format('YYYY-MM-DD'));
             }
 
             await this.dao.checkoutCart(user.username);

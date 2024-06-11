@@ -159,6 +159,8 @@ describe("CartController checkoutCart", () => {
 
         jest.spyOn(ProductController.prototype, "getProducts")
             .mockResolvedValue([{sellingPrice: 120, model: "iphone14", category: Category.SMARTPHONE, arrivalDate: null, details: null, quantity: 12 }]);
+        jest.spyOn(ProductController.prototype, "sellProduct")
+        .mockResolvedValue(1);
         jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
         jest.spyOn(CartDAO.prototype, "checkoutCart").mockResolvedValue();
 

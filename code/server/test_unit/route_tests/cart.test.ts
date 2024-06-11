@@ -191,7 +191,7 @@ describe("CartRoutes GET /carts", () => {
         jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
         jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
         jest.spyOn(CartController.prototype, "getCart").mockResolvedValue(cart);
-        console.log("test in process");
+    
         const response = await request(app).get(baseURL + "/carts");
         expect(response.status).toBe(200);
         expect(response.body).toEqual(cart);
@@ -236,7 +236,6 @@ describe("CartRoutes POST /carts", () => {
         const response = await request(app)
             .post(baseURL + "/carts")
             .send({ model: "product1" });
-        console.log(response);
         expect(response.status).toBe(200);
     });
 
