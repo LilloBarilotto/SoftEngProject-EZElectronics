@@ -196,3 +196,29 @@ describe("GET /ezelectronics/users/roles/:role", () => {
         expect(UserController.prototype.getUsersByRole).toHaveBeenCalledTimes(0); //Check if the getUsersByRole method has not been called
     });
 });
+
+
+describe("PATCH /ezelectronics/users/:username", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    const userList = [
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "Via Amerigo 24", "2000-10-11"),
+        new User("username4", "name4", "surname4", Role.CUSTOMER, "Via Amerigo 24", "2024-10-11"), //Error Date
+        new User("username5", "name5", "surname5", Role.ADMIN, "Via Amerigo 24", "2000-10-11"),
+        new User("username6", "name6", "surname6", Role.ADMIN, "Via Amerigo 24", "2000-10-11")
+        ]
+
+    test("should return a 401 unauthorized code if not LoggedIn", async () => {
+        jest.spyOn(UserController.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the controller
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req, res, next) => res.status(401).json({ error: "Unauthenticated user", status: 401 }));
+
+        const response = await request(app).patch(baseURL + "/users/username1").send(); //Send a PATCH request to the route
+
+        expect(response.status).toBe(401); //Check if the response status is 401
+        expect(UserController.prototype.getUserByUsername).toHaveBeenCalledTimes(0); //Check if the getUserByUsername method has not been called
+        expect(response.body).toEqual({ error: "Unauthenticated user", status: 401 });
+    });
+});

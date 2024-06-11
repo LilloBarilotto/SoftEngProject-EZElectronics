@@ -88,14 +88,14 @@ describe("getUserByUsername", () => {
         expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE username = ?", [userList[0].username], expect.any(Function))
     })
 
-    test("It should reject with an 'UserNotFoundError' if the user does not exist", async () => {
+    test("It should return empty object if the user does not exist", async () => {
         const userDAO = new UserDAO()
         const mockDBGet = jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
             callback(null, undefined)
             return {} as Database
         })
         
-        await expect(userDAO.getUserByUsername("username4")).rejects.toThrow(UserNotFoundError)
+        await expect(userDAO.getUserByUsername("username4")).resolves.toEqual(undefined);
         
         expect(mockDBGet).toHaveBeenCalledTimes(1);
         expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE username = ?", ["username4"], expect.any(Function))
@@ -127,4 +127,31 @@ describe("getUsersByRole", () => {
         expect(mockDBGet).toHaveBeenCalledTimes(1);
         expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE role = ?", ["Customer"], expect.any(Function))
     });
+});
+
+
+describe("updateUser", () => {
+    const userTest = 
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "Via Amerigo 24", "2024-10-11");
+
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("It should resolve with a user", async () => {
+        const userDAO = new UserDAO()
+    
+        const mockDBRun = jest.spyOn(db, "run").mockImplementation((sql, params, callback) => {
+            callback(null)
+            return {} as Database
+        });
+
+        const result = await userDAO.updateUser(userTest.username, userTest.name, userTest.surname, userTest.address, userTest.birthdate, userTest.role);
+        
+        expect(result).toEqual(userTest);
+        expect(mockDBRun).toHaveBeenCalledTimes(1);
+        expect(mockDBRun).toHaveBeenCalledWith("UPDATE users SET name = ?, surname = ?, address = ?, birthdate = ? WHERE username = ?", [userTest.name, userTest.surname, userTest.address, userTest.birthdate, userTest.username], expect.any(Function));
+    });
+
 });

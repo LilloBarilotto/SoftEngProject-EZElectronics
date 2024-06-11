@@ -1,5 +1,5 @@
 import db from "../db/db"
-import {User} from "../components/user"
+import {User, Role} from "../components/user"
 import crypto from "crypto"
 import {UserAlreadyExistsError, UserNotFoundError} from "../errors/userError";
 
@@ -35,7 +35,6 @@ class UserDAO {
                         if (!crypto.timingSafeEqual(passwordHex, hashedPassword)) resolve(false)
                         resolve(true)
                     }
-
                 })
             } catch (error) {
                 reject(error)
@@ -63,6 +62,7 @@ class UserDAO {
                     if (err) {
                         if (err.message.includes("UNIQUE constraint failed: users.username")) reject(new UserAlreadyExistsError)
                         reject(err)
+                        return
                     }
                     resolve(true)
                 })
@@ -82,12 +82,14 @@ class UserDAO {
         return new Promise<User>((resolve, reject) => {
             try {
                 const sql = "SELECT * FROM users WHERE username = ?"
-                db.get(sql, [username], (err: Error | null, row: any) => {
+                db.get(sql, [username], (err: Error | null, row: User | undefined) => {
                     if (err) {
                         reject(err)
+                        return
                     }
                     if (!row) {
-                        reject( new UserNotFoundError)
+                        resolve(undefined)
+                        return
                     }
                     const user: User = new User(row.username, row.name, row.surname, row.role, row.address, row.birthdate)
                     resolve(user)
@@ -145,6 +147,34 @@ class UserDAO {
             }
 
         })
+    }
+
+    /**
+     * Updates the personal information of a user in the database
+     * @param username The username of the user to update
+     * @param name The new name of the user
+     * @param surname The new surname of the user
+     * @param address The new address of the user
+     * @param birthdate The new birthdate of the user in the format YYYY-MM-DD, it must be not empty
+     * @returns A Promise that resolves with a user object representing the updated user
+     */
+    updateUser(username: string, name: string, surname: string, address: string, birthdate: string, role: Role): Promise<User> {
+        return new Promise<User>((resolve, reject) => {
+            try {
+                const sql = "UPDATE users SET name = ?, surname = ?, address = ?, birthdate = ? WHERE username = ?"
+                db.run(sql, [name, surname, address, birthdate, username], (err: Error | null) => {
+                    if (err) {
+                        reject(err)
+                        return
+                    }
+                    resolve (new User(username, name, surname, role, address, birthdate))
+                })
+            } catch (error) {
+                reject(error)
+            }
+
+        })
+    
     }
     
 
