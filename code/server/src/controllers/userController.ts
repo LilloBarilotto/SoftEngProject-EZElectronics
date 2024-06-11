@@ -1,8 +1,8 @@
 import {User} from "../components/user"
 import UserDAO from "../dao/userDAO"
 import {UnauthorizedUserError, UserNotFoundError, BirtdateAfterCurrentDateError} from "../errors/userError";
-
 import dayjs from "dayjs";
+
 /**
  * Represents a controller for managing users.
  * All methods of this class must interact with the corresponding DAO class to retrieve or store data.
@@ -31,7 +31,7 @@ class UserController {
      * Returns all users.
      * @returns A Promise that resolves to an array of users.
      */
-    async getUsers(): Promise<User[]> { 
+    async getUsers(): Promise<User[]> {
         return this.dao.getUsers()
     }
 
@@ -69,13 +69,30 @@ class UserController {
      * @param username - The username of the user to delete. The user must exist.
      * @returns A Promise that resolves to true if the user has been deleted.
      */
-    async deleteUser(user: User, username: string) /**:Promise<Boolean> */ { }
+    async deleteUser(user: User, username: string) : Promise<Boolean> {
+        if (user.role !== "Admin" && user.username !== username) {
+            throw new UnauthorizedUserError();
+        }
+
+        const requestedUser = await this.dao.getUserByUsername(username);
+        if (!requestedUser) {
+            throw new UserNotFoundError();
+        }
+
+        if(requestedUser.role === "Admin" && user.username !== username){
+            throw new UnauthorizedUserError();
+        }
+
+        return this.dao.deleteUser(username)
+    }
 
     /**
      * Deletes all non-Admin users
      * @returns A Promise that resolves to true if all non-Admin users have been deleted.
      */
-    async deleteAll() { }
+    async deleteAll() {
+        return this.dao.deleteAllNonAdminUsers()
+    }
 
     /**
      * Updates the personal information of one user. The user can only update their own information.
@@ -87,9 +104,9 @@ class UserController {
      * @param username The username of the user to update. It must be equal to the username of the user parameter.
      * @returns A Promise that resolves to the updated user
      */
-    async updateUserInfo(user: User, name: string, surname: string, address: string, birthdate: string, username: string) :Promise<User> { 
+    async updateUserInfo(user: User, name: string, surname: string, address: string, birthdate: string, username: string) :Promise<User> {
         if (dayjs().isBefore(dayjs(birthdate), 'day')) {
-            throw new BirtdateAfterCurrentDateError();   
+            throw new BirtdateAfterCurrentDateError();
         }
 
         if (user.username !== username && user.role!== "Admin") {
@@ -104,7 +121,7 @@ class UserController {
         if(requestedUser.role === "Admin" && user.username !== username){
             throw new UnauthorizedUserError();
         }
-   
+
         return this.dao.updateUser(username, name, surname, address, birthdate, requestedUser.role)
     }
 }

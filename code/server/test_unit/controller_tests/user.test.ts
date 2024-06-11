@@ -3,6 +3,8 @@ import UserController from "../../src/controllers/userController"
 import UserDAO from "../../src/dao/userDAO"
 import {Role, User} from "../../src/components/user";
 import {UnauthorizedUserError, BirtdateAfterCurrentDateError, UserNotFoundError} from "../../src/errors/userError";
+import Authenticator from "../../src/routers/auth"
+import exp from "constants";
 
 jest.mock("../../src/dao/userDAO")
 
@@ -167,7 +169,7 @@ describe("UpdateUser", () => {
 
         const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the DAO
         const MockUpdateUser = jest.spyOn(UserDAO.prototype, "updateUser").mockResolvedValueOnce(userList[0]); //Mock the updateUser method of the DAO
-        
+
         const response = await controller.updateUserInfo(userList[0], userList[0].name, userList[0].surname, userList[0].address, userList[0].birthdate, userList[0].username); //Call the updateUser method of the controller
 
         expect(MockGetUserByUsername).toHaveBeenCalledTimes(1);
@@ -177,12 +179,12 @@ describe("UpdateUser", () => {
         expect(response).toBe(userList[0]);
     });
 
-    test("Should return the user updated | Admin change other NonAdmin", async () => {        // Request by Admin Ok 
+    test("Should return the user updated | Admin change other NonAdmin", async () => {        // Request by Admin Ok
         const controller = new UserController();
 
         const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[0]); //Mock the getUserByUsername method of the DAO
         const MockUpdateUser = jest.spyOn(UserDAO.prototype, "updateUser").mockResolvedValueOnce(userList[0]); //Mock the updateUser method of the DAO
-        
+
         const response = await controller.updateUserInfo(userList[2], userList[0].name, userList[0].surname, userList[0].address, userList[0].birthdate, userList[0].username); //Call the updateUser method of the controller
 
         expect(MockGetUserByUsername).toHaveBeenCalledTimes(1);
@@ -192,7 +194,7 @@ describe("UpdateUser", () => {
         expect(response).toBe(userList[0]);
     });
 
-    test("Should return UserNotFoundError", async () => { 
+    test("Should return UserNotFoundError", async () => {
         const controller = new UserController();
 
         const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(undefined); //Mock the getUserByUsername method of the DAO
@@ -210,7 +212,7 @@ describe("UpdateUser", () => {
 
         const MockGetUserByUsername = jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(undefined); //Mock the getUserByUsername method of the DAO
         const MockUpdateUser = jest.spyOn(UserDAO.prototype, "updateUser").mockResolvedValueOnce(userList[0]); //Mock the updateUser method of the DAO
-        const response = controller.updateUserInfo(userList[2], userList[1].name, userList[1].surname, userList[1].address, userList[1].birthdate, userList[1].username); 
+        const response = controller.updateUserInfo(userList[2], userList[1].name, userList[1].surname, userList[1].address, userList[1].birthdate, userList[1].username);
 
         expect(response).rejects.toThrow(BirtdateAfterCurrentDateError);
         expect(MockGetUserByUsername).toHaveBeenCalledTimes(0);
@@ -238,8 +240,121 @@ describe("UpdateUser", () => {
         const response = controller.updateUserInfo(userList[2], userList[3].name, userList[3].surname, userList[3].address, userList[3].birthdate, userList[3].username);
 
         expect(response).rejects.toThrow(UnauthorizedUserError);
-        expect(MockGetUserByUsername).toHaveBeenCalledTimes(1); 
+        expect(MockGetUserByUsername).toHaveBeenCalledTimes(1);
         expect(MockUpdateUser).toHaveBeenCalledTimes(0);
 
+    });
+});
+
+describe("Delete All users (Non Admin)", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    test("It should resolve true", async () => {
+
+        jest.spyOn(UserDAO.prototype, "deleteAllNonAdminUsers").mockResolvedValueOnce(true);
+        const controller = new UserController();
+
+        const result = await controller.deleteAll();
+        expect(result).toBe(true);
+        expect(UserDAO.prototype.deleteAllNonAdminUsers).toHaveBeenCalledTimes(1);
+    });
+
+    test("It should reject", async () => {
+
+        jest.spyOn(UserDAO.prototype, "deleteAllNonAdminUsers").mockResolvedValueOnce(false);
+        const controller = new UserController();
+
+        const result = controller.deleteAll();
+        expect(result).rejects;
+        expect(UserDAO.prototype.deleteAllNonAdminUsers).toHaveBeenCalledTimes(1);
+    });
+});
+
+describe("Delete User", () => {
+    afterEach(() => {
+        jest.resetAllMocks();
+        jest.restoreAllMocks();
+    });
+
+    const userList : User[] = [
+        new User("username1", "name1", "surname1", Role.ADMIN, "", ""),
+        new User("username2", "name2", "surname2", Role.MANAGER, "", ""),
+        new User("username3", "name3", "surname3", Role.CUSTOMER, "", ""),
+        new User("username4", "name4", "surname4", Role.ADMIN, "", "")
+    ]
+
+    test("It should resolve true | Customer delete itself", async () => {
+        const controller = new UserController();
+
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockResolvedValueOnce(true);
+        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[2]);
+        jest.spyOn(UserDAO.prototype, "deleteUser").mockResolvedValueOnce(true);
+
+        const result = await controller.deleteUser(userList[2], userList[2].username);
+
+        expect(result).toBe(true);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledTimes(1);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledWith(userList[2].username);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledTimes(1);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledWith(userList[2].username);
+    });
+
+
+    test("It should resolve true | Admin delete NonAdminUser", async () => {
+        const controller = new UserController();
+
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockResolvedValueOnce(true);
+        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[2]);
+        jest.spyOn(UserDAO.prototype, "deleteUser").mockResolvedValueOnce(true);
+
+        const result = await controller.deleteUser(userList[0], userList[2].username);
+
+        expect(result).toBe(true);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledTimes(1);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledWith(userList[2].username);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledTimes(1);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledWith(userList[2].username);
+    });
+
+    test("It should reject with UnauthorizedUserError | Admin delete another Admin", async () => {
+        const controller = new UserController();
+
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockResolvedValueOnce(true);
+        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[3]);
+        jest.spyOn(UserDAO.prototype, "deleteUser").mockResolvedValueOnce(true);
+
+        const result = controller.deleteUser(userList[0], userList[3].username);
+        expect(result).rejects.toThrow(UnauthorizedUserError);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledTimes(0);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledTimes(1);
+    });
+
+    test("It should reject with UnauthorizedUserError | NonAdminUser delete another User", async () => {
+        const controller = new UserController();
+
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockResolvedValueOnce(true);
+        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(userList[2]);
+        jest.spyOn(UserDAO.prototype, "deleteUser").mockResolvedValueOnce(true);
+
+        const result = controller.deleteUser(userList[2], userList[1].username);
+        expect(result).rejects.toThrow(UnauthorizedUserError);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledTimes(0);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledTimes(0);
+    });
+
+    test("It should reject with UserNotFoundError", async () => {
+        const controller = new UserController();
+
+        jest.spyOn(Authenticator.prototype, "isLoggedIn").mockResolvedValueOnce(true);
+        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(undefined);
+        jest.spyOn(UserDAO.prototype, "deleteUser").mockResolvedValueOnce(true);
+
+        const result = controller.deleteUser(userList[0], "nonExistingUser");
+        expect(result).rejects.toThrow(UserNotFoundError);
+        expect(UserDAO.prototype.deleteUser).toHaveBeenCalledTimes(0);
+        expect(UserDAO.prototype.getUserByUsername).toHaveBeenCalledTimes(1);
     });
 });
