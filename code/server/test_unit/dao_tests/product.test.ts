@@ -1,4 +1,4 @@
-import {expect,describe, afterEach,  jest, test} from "@jest/globals"
+import {afterEach, describe, expect, jest, test} from "@jest/globals";
 
 import ProductDAO from "../../src/dao/productDAO"
 import db from "../../src/db/db"

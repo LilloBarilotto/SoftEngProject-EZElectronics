@@ -33,7 +33,7 @@ class ProductController {
      */
     async registerProducts(model: string, category: string, quantity: number, details: string | null, sellingPrice: number, arrivalDate: string | null) /**:Promise<void> */ {
         const categoryEnum = category as Category
-        const product = new Product(sellingPrice, model, categoryEnum, arrivalDate, details, quantity)
+        const product = new Product(sellingPrice, model, categoryEnum, arrivalDate ?? dayjs().format("YYYY-MM-DD"), details, quantity)
 
         return this.dao.createProduct(product)
     }
@@ -79,7 +79,7 @@ class ProductController {
             throw new ProductNotFoundError();
         }
 
-        if (dayjs(sellingDateParsed).isAfter(product.arrivalDate, "day")) {
+        if (dayjs(sellingDateParsed).isBefore(product.arrivalDate, "day")) {
             throw new DateError();
         }
 

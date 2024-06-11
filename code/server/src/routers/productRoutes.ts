@@ -66,8 +66,7 @@ class ProductRoutes {
             body("quantity").isInt({min: 1}),
             body("details").isString().optional(),
             body("sellingPrice").isFloat({min: 0.01}),
-            body("arrivalDate").optional().matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
-                if (date === undefined || date === "") return true;
+            body("arrivalDate").optional({nullable: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
                 if (dayjs().isBefore(date, "day")) throw new DateError();
                 else return true;
             }),
@@ -90,7 +89,7 @@ class ProductRoutes {
             "/:model",
             (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             body("quantity").isInt({min: 1}),
-            body("changeDate").optional().isDate({format: "YYYY-MM-DD"}),
+            body("changeDate").optional({nullable: true}).isDate({format: "YYYY-MM-DD"}),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.changeProductQuantity(req.params.model, req.body.quantity, req.body.changeDate)
                 .then((quantity: number) => res.status(200).json({quantity: quantity}))
@@ -111,8 +110,7 @@ class ProductRoutes {
             (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
             param("model").isString().notEmpty({ignore_whitespace: true}),
             body("quantity").isInt({min: 1}),
-            body("sellingDate").optional().matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
-                if (date === undefined || date === "") return true;
+            body("sellingDate").optional({nullable: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
                 if (dayjs().isBefore(date, "day")) throw new DateError();
                 else return true;
             }),
@@ -137,7 +135,7 @@ class ProductRoutes {
         this.router.get(
             "/",
             (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
-            query('grouping').optional().isString().isIn(["category", "model"]).custom((grouping, {req}) => {
+            query('grouping').optional({nullable: true}).isString().isIn(["category", "model"]).custom((grouping, {req}) => {
                 if (grouping == "model" && !req.query.model) throw new Error("Model must be present if grouping is model");
                 if (grouping == "category" && !req.query.category) throw new Error("Category must be present if grouping is category");
                 return true;
@@ -181,7 +179,7 @@ class ProductRoutes {
         this.router.get(
             "/available",
             (req: any, res: any, next: any) => this.authenticator.isLoggedIn(req, res, next),
-            query('grouping').optional().isString().isIn(["category", "model"]).custom((grouping, {req}) => {
+            query('grouping').optional({nullable: true}).isString().isIn(["category", "model"]).custom((grouping, {req}) => {
                 if (grouping == "model" && !req.query.model) throw new Error("Model must be present if grouping is model");
                 if (grouping == "category" && !req.query.category) throw new Error("Category must be present if grouping is category");
                 return true;
@@ -236,8 +234,6 @@ class ProductRoutes {
                 .then(() => res.status(200).end())
                 .catch((err: any) => next(err))
         )
-
-
     }
 }
 

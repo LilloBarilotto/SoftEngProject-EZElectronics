@@ -1,4 +1,4 @@
-import { test, expect, jest } from "@jest/globals"
+import {afterEach, describe, expect, jest, test} from "@jest/globals";
 import request from 'supertest'
 import { app } from "../../index"
 
@@ -39,6 +39,22 @@ describe("POST /ezelectronics/products", () => {
             testProduct.details,
             testProduct.sellingPrice,
             testProduct.arrivalDate
+        )
+    })
+
+    test("should return a 200 success code with null arrivalDate", async () => {
+        jest.spyOn(ProductController.prototype, "registerProducts").mockResolvedValueOnce(true)
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).post(baseURL + "/products").send({...testProduct, ...{arrivalDate: null}})
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.registerProducts).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.registerProducts).toHaveBeenCalledWith(
+            testProduct.model,
+            testProduct.category,
+            testProduct.quantity,
+            testProduct.details,
+            testProduct.sellingPrice,
+            null
         )
     })
 
@@ -148,13 +164,13 @@ describe("PATCH /ezelectronics/products/:model", () => {
     test("should return a 200 success code without changeDate", async () => {
         jest.spyOn(ProductController.prototype, "changeProductQuantity").mockResolvedValueOnce(100)
         jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
-        const response = await request(app).patch(baseURL + "/products/iphone13").send({...testBody, ...{changeDate: undefined}})
+        const response = await request(app).patch(baseURL + "/products/iphone13").send({...testBody, ...{changeDate: null}})
         expect(response.status).toBe(200)
         expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledTimes(1)
         expect(ProductController.prototype.changeProductQuantity).toHaveBeenCalledWith(
             "iphone13",
             testBody.quantity,
-            undefined
+            null
         );
     });
 
@@ -239,11 +255,11 @@ describe("GET /ezelectronics/products", () => {
     });
 
     it.each([
-        {grouping: undefined, model: "model", category: "category"},
+        {grouping: null, model: "model", category: "category"},
         {grouping: "model", model: "model", category: "category"},
-        {grouping: "model", model: undefined, category: undefined},
+        {grouping: "model", model: null, category: null},
         {grouping: "category", model: "model", category: "category"},
-        {grouping: "category", model: undefined, category: undefined}
+        {grouping: "category", model: null, category: null}
     ])("return a 422 response code if %s is sent", async (fields) => {
         jest.spyOn(ProductController.prototype, "getProducts").mockResolvedValueOnce([])
         jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
@@ -304,11 +320,11 @@ describe("GET /ezelectronics/products/available", () => {
     });
 
     it.each([
-        {grouping: undefined, model: "model", category: "category"},
+        {grouping: null, model: "model", category: "category"},
         {grouping: "model", model: "model", category: "category"},
-        {grouping: "model", model: undefined, category: undefined},
+        {grouping: "model", model: null, category: null},
         {grouping: "category", model: "model", category: "category"},
-        {grouping: "category", model: undefined, category: undefined}
+        {grouping: "category", model: null, category: null}
     ])("return a 422 response code if %s is sent", async (fields) => {
         jest.spyOn(ProductController.prototype, "getAvailableProducts").mockResolvedValueOnce([])
         jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
@@ -359,6 +375,7 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
 
     const testBody = { //Define a test user object sent to the route
         quantity: 5,
+        sellingDate: dayjs().subtract(1, "day").format("YYYY-MM-DD")
     }
 
     test("should return a 200 success code", async () => {
@@ -370,7 +387,20 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
         expect(ProductController.prototype.sellProduct).toHaveBeenCalledWith(
             testModel,
             testBody.quantity,
-            undefined
+            testBody.sellingDate
+        )
+    });
+
+    test("should return a 200 success code with empty sellingDate", async () => {
+        jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
+        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send({...testBody, ...{sellingDate: null}})
+        expect(response.status).toBe(200)
+        expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(1)
+        expect(ProductController.prototype.sellProduct).toHaveBeenCalledWith(
+            testModel,
+            testBody.quantity,
+            null
         )
     });
 
@@ -384,8 +414,8 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
 
     // This test checks if the route returns a 422 response code if any of the fields is invalid
     it.each([
-        {sellingDate: undefined, quantity: 0},
-        {sellingDate: undefined, quantity: -1},
+        {sellingDate: null, quantity: 0},
+        {sellingDate: null, quantity: -1},
         {sellingDate: "05-06-2024", quantity: 10},
         {sellingDate: dayjs().add(1, "day").format("YYYY-MM-DD"), quantity: testBody.quantity},
     ])("return a 422 response code if %s is invalid", async (invalidBody) => {
