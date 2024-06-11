@@ -1,4 +1,4 @@
-import { test, expect, jest } from "@jest/globals"
+import {afterEach, describe, expect, jest, test} from "@jest/globals";
 import ProductController from "../../src/controllers/productController"
 import ProductDAO from "../../src/dao/productDAO";
 import {Category, Product} from "../../src/components/product";
@@ -42,6 +42,22 @@ describe("registerProducts", () => {
 
         expect(ProductDAO.prototype.createProduct).toHaveBeenCalledTimes(1);
         expect(ProductDAO.prototype.createProduct).toHaveBeenCalledWith(testProduct);
+        expect(response).toBe(true);
+    });
+
+    test("should replace arrivalDate if null", async () => {
+        jest.spyOn(ProductDAO.prototype, "createProduct").mockResolvedValueOnce(true);
+        const controller = new ProductController();
+        const response = await controller.registerProducts(
+            testProduct.model,
+            testProduct.category,
+            testProduct.quantity,
+            testProduct.details,
+            testProduct.sellingPrice,
+            null);
+
+        expect(ProductDAO.prototype.createProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.createProduct).toHaveBeenCalledWith({...testProduct, ...{arrivalDate: dayjs().format("YYYY-MM-DD")}});
         expect(response).toBe(true);
     });
 })
@@ -333,7 +349,7 @@ describe("sellProduct", () => {
         jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProduct);
         jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
         const controller = new ProductController();
-        const response = await controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"));
+        const response = await controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).add(1, "day").format("YYYY-MM-DD"));
 
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
@@ -357,7 +373,7 @@ describe("sellProduct", () => {
         jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProduct);
         jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
         const controller = new ProductController();
-        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).add(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(DateError);
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(DateError);
 
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
@@ -368,7 +384,7 @@ describe("sellProduct", () => {
         jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce({...testProduct, quantity: 0});
         jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
         const controller = new ProductController();
-        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(EmptyProductStockError);
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).add(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(EmptyProductStockError);
 
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
@@ -379,7 +395,7 @@ describe("sellProduct", () => {
         jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce({...testProduct, quantity: 3});
         jest.spyOn(ProductDAO.prototype, "sellProduct").mockResolvedValueOnce(true);
         const controller = new ProductController();
-        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).subtract(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(LowProductStockError);
+        await expect(controller.sellProduct(testProduct.model, 5, dayjs(testProduct.arrivalDate).add(1, "day").format("YYYY-MM-DD"))).rejects.toThrow(LowProductStockError);
 
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
         expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProduct.model);
