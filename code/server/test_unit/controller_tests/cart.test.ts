@@ -160,7 +160,7 @@ describe("CartController checkoutCart", () => {
         jest.spyOn(ProductController.prototype, "getProducts")
             .mockResolvedValue([{sellingPrice: 120, model: "iphone14", category: Category.SMARTPHONE, arrivalDate: null, details: null, quantity: 12 }]);
         jest.spyOn(ProductController.prototype, "sellProduct")
-        .mockResolvedValue(1);
+        .mockResolvedValue(1)
         jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
         jest.spyOn(CartDAO.prototype, "checkoutCart").mockResolvedValue();
 
@@ -274,21 +274,6 @@ describe("CartController addToCart", () => {
         const result = await controller.addToCart(user, productModel);
         expect(result).toBe(true);
         expect(CartDAO.prototype.addProductToCart).toHaveBeenCalledWith(user.username, expect.any(Object));
-    });
-
-    test("should throw an error if the product does not exist", async () => {
-        const user: User = {
-            username: "testuser", role: Role.CUSTOMER,
-            name: "test",
-            surname: "test",
-            address: "test",
-            birthdate: "test"
-        };
-        const productModel = "nonexistent";
-
-        jest.spyOn(ProductController.prototype, "getAvailableProducts").mockResolvedValue([]);
-
-        await expect(controller.addToCart(user, productModel)).rejects.toThrow(ProductNotFoundError);
     });
 });
 

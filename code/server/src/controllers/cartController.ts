@@ -31,13 +31,7 @@ class CartController {
      */
     async addToCart(user: User, productModel: string): Promise<boolean> {
         const products =  await this.productController.getAvailableProducts("model", null, productModel);
-
-        if (products.length === 0) {
-            throw new ProductNotFoundError();
-        }
-
         const productDetails = products[0];  // Assuming the first product is the desired one
-
         const product = new ProductInCart(productDetails.model, 1, productDetails.category, productDetails.sellingPrice);
         try {
             await this.dao.addProductToCart(user.username, product);
@@ -55,11 +49,31 @@ class CartController {
      */
     async getCart(user: User): Promise<Cart> {
             const cart = await this.dao.getCart(user.username);
+             cart.products =  await this.getProductsInCart(cart);
             if (!cart) {
                 throw new CartNotFoundError();
             }
-            return cart;
+        return cart;
     }
+
+    /**
+     * Retrieves the product information for products in the given cart.
+     * @param cart - The cart whose products information is needed
+     * @returns A Promise that resolves cart's products.
+     * 
+     */
+    async getProductsInCart(cart: Cart): Promise<ProductInCart[]>{
+      
+        if(cart.products && cart.products.length !=0){
+            for(let i = 0; i<cart.products.length; i++){
+                let prodotti = await this.productController.getAvailableProducts("model", null, cart.products[i].model)
+                cart.products[i].category = prodotti[0].category;
+                cart.products[i].price =  prodotti[0].sellingPrice;
+             }
+        }
+        return cart.products;
+    }
+
 
     /**
      * Checks out the user's cart. We assume that payment is always successful, there is no need to implement anything related to payment.
@@ -67,8 +81,6 @@ class CartController {
      * @returns A Promise that resolves to `true` if the cart was successfully checked out.
      * 
      */
-
-
     async checkoutCart(user: User): Promise<boolean> {
         try {
             const cart = await this.dao.getCart(user.username);
@@ -78,7 +90,6 @@ class CartController {
             if (cart.products.length === 0) {
                 throw new EmptyCartError();
             }
-
             for (const productInCart of cart.products) {
                 const product = await this.productController.getProducts("model", null, productInCart.model);
                 if (!product || product.length === 0) {
@@ -93,7 +104,6 @@ class CartController {
                 }
                  await this.productController.sellProduct(productInCart.model, productInCart.quantity ,dayjs().format('YYYY-MM-DD'));
             }
-
             await this.dao.checkoutCart(user.username);
             return true;
         } catch (error) {
@@ -112,7 +122,11 @@ class CartController {
      * Only the carts that have been checked out should be returned, the current cart should not be included in the result.
      */
     async getCustomerCarts(user: User): Promise<Cart[]> {
-        return await this.dao.getAllCarts(user.username);
+        const carts = await this.dao.getAllCarts(user.username);
+        for(let i= 0;i<carts.length;i++){
+            carts[i].products =  await this.getProductsInCart(carts[i]);
+        }
+        return carts;
     }
 
     /**
@@ -122,8 +136,8 @@ class CartController {
      * @returns A Promise that resolves to `true` if the product was successfully removed.
      */
     async removeProductFromCart(user: User, productModel: string): Promise<boolean> {
-            await this.dao.removeProductFromCart(user.username, productModel);
-            return true;
+        await this.dao.removeProductFromCart(user.username, productModel);
+         return true;
     }
 
 
@@ -156,6 +170,9 @@ class CartController {
     async getAllCarts(): Promise<Cart[]> {
         try {
             const carts = await this.dao.getCartsAll();
+            for(let i= 0;i<carts.length;i++){
+                carts[i].products =  await this.getProductsInCart(carts[i]);
+            }
             return carts;
         } catch (error) {
             throw new Error("Failed to retrieve all carts");

@@ -12,49 +12,87 @@ class CartDAO {
     async deleteAllCarts(): Promise<void> {
         try {
             await db.run(`DELETE FROM carts`);
-            await db.run(`DELETE FROM productsInCart`);
+            await db.run(`DELETE FROM  product_in_cart`);
         } catch (error) {
-            console.error('Error deleting data from database:', error);
+           
             throw new Error('Failed to delete all carts and products in cart');
         }
     }
 
     async getCart(customer: string): Promise<Cart | null> {
+       
         try {
-            const cartRow = await new Promise<any>((resolve, reject) => {
+            const cartRow = await new Promise<Cart>((resolve, reject) => {
                 db.get(
                     `SELECT * FROM carts WHERE customer = ? AND paid = 0`,
                     [customer],
-                    (err, row) => {
+                    (err, row: Cart) => {
                         if (err) return reject(err);
                         resolve(row);
                     }
                 );
             });
-
+            
             if (!cartRow) {
+              
                 return new Cart(customer, false, "", 0, []);
             }
-            const productsInCart = await new Promise<ProductInCart[]>((resolve, reject) => {
-                db.all(
-                    `SELECT * FROM productsInCart WHERE cartId = ?`,
-                    [cartRow.id],
-                    (err, rows: ProductInCart[]) => {
-                        if (err) return reject(err);
-                        resolve(rows);
-                    }
-                );
-            });
-
-            const cart = new Cart(cartRow.customer, cartRow.paid, cartRow.paymentDate, cartRow.total, []);
+          
+           
+            const productsInCart =  await this.getProductsIncart(cartRow.id);
+           
+            if(!productsInCart){
+               
+                return cartRow;
+            }
+            
+            const cart = new Cart( cartRow.customer, cartRow.paid, cartRow.paymentDate, cartRow.total, [], cartRow.id);
             cart.products = productsInCart.map(
-                (r) => new ProductInCart(r.model, r.quantity, r.category, r.price)
+                (r) => new ProductInCart(r.model, r.quantity, undefined, undefined)
             );
-
+          
             return cart;
         } catch (error) {
             throw error;
         }
+    }
+
+    async getProductsIncart(cartId: number):Promise<ProductInCart[]>{
+        
+        return new Promise<ProductInCart[]>((resolve, reject) => {
+            db.all(
+                `SELECT * FROM product_in_cart WHERE cart_id = ?`,
+                [cartId],
+                (err, rows: ProductInCart[]) => {
+                    if (err) return reject(err);
+                    resolve(rows);
+                }
+            );
+        });
+    }
+    async addProductToCart(customer: string, product: ProductInCart): Promise<void> {
+        let cart = await this.getCart(customer);
+        if(Utility.isEmpty(cart)){
+           
+            cart = await this.createCart(customer);
+        }
+        const existingProduct = cart.products.find((p) => p.model === product.model);
+        if (existingProduct) {
+            existingProduct.quantity += 1;
+            await db.run(
+                `UPDATE  product_in_cart SET quantity = ? WHERE cart_id = ? AND model = ?`,
+                [existingProduct.quantity, cart.id, product.model]
+            );
+        } else {
+            cart.products.push(product);
+            await db.run(
+                `INSERT INTO  product_in_cart (cart_id, model, quantity) VALUES (?, ?, ?)`,
+                [cart.id, product.model, product.quantity]
+            );
+        }
+
+        cart.total += product.price;
+        await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
 
     async clearCart(customer: string): Promise<void> {
@@ -65,17 +103,20 @@ class CartDAO {
 
         cart.products = [];
         cart.total = 0;
-        await db.run(`DELETE FROM productsInCart WHERE cartId = ?`, [cart.id]);
+        await db.run(`DELETE FROM  product_in_cart WHERE cart_id = ?`, [cart.id]);
         await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
 
     async getCartsAll(): Promise<Cart[]> {
         return new Promise((resolve, reject) => {
-            db.all(`SELECT * FROM carts`, [], (err, rows: any[]) => {
+            db.all(`SELECT * FROM carts`, [], async (err, rows: Cart[]) => {
                 if (err) {
                     return reject(err);
                 }
-                const carts = rows.map(row => new Cart(row.customer, row.paid, row.paymentDate, row.total, []));
+                const carts: Cart[] = rows.map(row => new Cart(row.customer, row.paid, row.paymentDate, row.total, [], row.id));
+                for(let i =0;i<carts.length;i++){
+                    carts[i].products =  await this.getProductsIncart(carts[i].id);
+                }
                 resolve(carts);
             });
         });
@@ -96,7 +137,7 @@ class CartDAO {
                             const cart = new Cart(row.customer, row.paid, row.paymentDate, row.total, []);
                             const productsInCart = await new Promise<ProductInCart[]>((resolve, reject) => {
                                 db.all(
-                                    `SELECT * FROM productsInCart WHERE cartId = ?`,
+                                    `SELECT * FROM  product_in_cart WHERE cart_id = ?`,
                                     [row.id],
                                     (err, productRows: ProductInCart[]) => {
                                         if (err) return reject(err);
@@ -131,7 +172,7 @@ class CartDAO {
         cart.paid = true;
         cart.paymentDate = new Date().toISOString();
         await db.run(
-            `UPDATE carts SET paid = ?, paymentDate = ? WHERE id = ?`,
+            `UPDATE carts SET paid = ?, payment_date = ? WHERE id = ?`,
             [cart.paid, cart.paymentDate, cart.id]
         );
     }
@@ -139,35 +180,16 @@ class CartDAO {
     async createCart(customer: string): Promise<Cart> {
         const newCart = new Cart(customer, false, "", 0, []);
         await db.run(
-            `INSERT INTO carts (customer, paid, paymentDate, total) VALUES (?, ?, ?, ?)`,
+            `INSERT INTO carts (customer, paid, payment_date, total) VALUES (?, ?, ?, ?)`,
             [newCart.customer, newCart.paid, newCart.paymentDate, newCart.total]
         );
-        return newCart;
+
+        const cart =  await this.getCart(customer);
+        return cart;
     }
 
 
-    async addProductToCart(customer: string, product: ProductInCart): Promise<void> {
-        const cart = await this.getCart(customer) ?? await this.createCart(customer);
-
-        const existingProduct = cart.products.find((p) => p.model === product.model);
-        //if product is already present in user's cart, increment the quantity of the product in the cart
-        if (existingProduct) {
-            existingProduct.quantity += 1;
-            await db.run(
-                `UPDATE productsInCart SET quantity = ? WHERE cartId = ? AND model = ?`,
-                [existingProduct.quantity, cart.id, product.model]
-            );
-        } else {
-            cart.products.push(product);
-            await db.run(
-                `INSERT INTO productsInCart (cartId, model, quantity, category, price) VALUES (?, ?, ?, ?, ?)`,
-                [cart.id, product.model, product.quantity, product.category, product.price]
-            );
-        }
-
-        cart.total += product.price;
-        await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
-    }
+ 
 
     async removeProductFromCart(customer: string, productModel: string): Promise<void> {
         const cart = await this.getCart(customer);
@@ -184,12 +206,12 @@ class CartDAO {
         if (product.quantity > 1) {
             product.quantity -= 1;
             await db.run(
-                `UPDATE productsInCart SET quantity = ? WHERE cartId = ? AND model = ?`,
+                `UPDATE  product_in_cart SET quantity = ? WHERE cart_id = ? AND model = ?`,
                 [product.quantity, cart.id, product.model]
             );
         } else {
             cart.products.splice(productIndex, 1);
-            await db.run(`DELETE FROM productsInCart WHERE cartId = ? AND model = ?`, [cart.id, product.model]);
+            await db.run(`DELETE FROM  product_in_cart WHERE cart_id = ? AND model = ?`, [cart.id, product.model]);
         }
 
         cart.total -= product.price;

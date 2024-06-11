@@ -74,6 +74,7 @@ class CartRoutes {
             body("model").isString().notEmpty(),
             (req, res, next) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => {
+                console.log("Route in process")
                 this.controller.addToCart(req.user, req.body.model)
                     .then(() => res.status(200).end())
                     .catch((err) => {

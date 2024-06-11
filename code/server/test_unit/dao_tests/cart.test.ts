@@ -7,7 +7,7 @@ import {EmptyCartError, CartNotFoundError, ProductNotInCartError} from "./../../
 import {Category} from "../../src/components/product";
 
 jest.mock("./../../src/db/db");
-
+const productRows = [{ cartId: 1, model: "product1", quantity: 2, category: Category.SMARTPHONE, price: 100 }];
 describe("CartDAO deleteAllCarts", () => {
     let dao: CartDAO;
 
@@ -28,7 +28,7 @@ describe("CartDAO deleteAllCarts", () => {
         await dao.deleteAllCarts();
         expect(db.run).toHaveBeenCalledTimes(2);
         expect(db.run).toHaveBeenCalledWith("DELETE FROM carts")
-        expect(db.run).toHaveBeenCalledWith("DELETE FROM productsInCart")
+        expect(db.run).toHaveBeenCalledWith("DELETE FROM  product_in_cart")
     });
 });
 
@@ -79,17 +79,16 @@ describe("CartDAO getCartsAll", () => {
             { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
             { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
         ];
-
+        jest.spyOn(CartDAO.prototype, "getProductsIncart").mockResolvedValue(productRows);
 
         jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
             callback(null, carts);
             return {} as Database
         });
-
         const result = await dao.getCartsAll();
         expect(result).toEqual([
-            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
-            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
+            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: productRows },
+            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: productRows},
         ]);
         expect(db.all).toHaveBeenCalledWith(`SELECT * FROM carts`, [], expect.any(Function));
     });
@@ -116,6 +115,7 @@ describe("CartDAO getAllCarts", () => {
     });
     it('should return all paid carts for a given user', async () => {
         const username = 'testuser';
+      
         const cartRows = [
             { id: 1, customer: 'testuser', paid: 1, paymentDate: '2024-06-01', total: 100 },
         ];
@@ -177,7 +177,7 @@ describe("CartDAO checkoutCart", () => {
         await dao.checkoutCart("testuser");
 
         expect(db.run).toHaveBeenCalledWith(
-            `UPDATE carts SET paid = ?, paymentDate = ? WHERE id = ?`,
+            `UPDATE carts SET paid = ?, payment_date = ? WHERE id = ?`,
             [true, expect.any(String), 1]
         );
         expect(db.run).toBeCalledTimes(1);
@@ -207,25 +207,23 @@ describe("CartDAO getCart", () => {
 
     test("Should return a cart if it exists", async () => {
         const cartRow = { id: 1, customer: "testuser", paid: false, paymentDate: "", total: 100 };
-        const productRows = [{ cartId: 1, model: "product1", quantity: 2, category: "Electronics", price: 50 }];
+        const productRows = [{ cartId: 1, model: "product1", quantity: 2, category: Category.APPLIANCE, price: 100 }];
 
         jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
             callback(null, cartRow);
             return {} as Database
         });
 
-        jest.spyOn(db, "all").mockImplementation((sql, params, callback) => {
-            callback(null, productRows);
-            return {} as Database
-        });
+         jest.spyOn(CartDAO.prototype, "getProductsIncart").mockResolvedValue(productRows);
 
         const cart = await dao.getCart("testuser");
         expect(cart).toEqual({
             customer: "testuser",
+            id: 1,
             paid: false,
             paymentDate: "",
             total: 100,
-            products: [{ model: "product1", quantity: 2, category: "Electronics", price: 50 }]
+            products: [{ model: "product1", quantity: 2, category: undefined, price: undefined }]
         });
     });
 
