@@ -124,7 +124,7 @@ class ProductDAO {
                     if(err) {
                         reject(err)
                     }
-                    if (row !== null) resolve(true)
+                    if (row !== undefined) resolve(true)
                     resolve(false)
                 })
             } catch (error){
