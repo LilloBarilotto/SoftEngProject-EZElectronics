@@ -302,7 +302,7 @@ describe("CartDAO getAllCarts", () => {
 
         jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue(cart);
 
-        await dao.removeProductFromCart("testuser", "product1");
+        await dao.removeProductFromCart("testuser", "product1", 50);
         expect(db.run).toHaveBeenCalledTimes(2);
     });
 
@@ -312,7 +312,7 @@ describe("CartDAO getAllCarts", () => {
             return {} as Database;
         });
 
-        await expect(dao.removeProductFromCart("testuser", "product1")).rejects.toThrow(CartNotFoundError);
+        await expect(dao.removeProductFromCart("testuser", "product1", 50)).rejects.toThrow(CartNotFoundError);
     });
 
     test("should throw ProductNotInCartError if the product is not in the cart", async () => {
@@ -328,6 +328,6 @@ describe("CartDAO getAllCarts", () => {
             return {} as Database;
         });
 
-        await expect(dao.removeProductFromCart("testuser", "product1")).rejects.toThrow(ProductNotInCartError);
+        await expect(dao.removeProductFromCart("testuser", "product1", 50)).rejects.toThrow(ProductNotInCartError);
     });
 });
