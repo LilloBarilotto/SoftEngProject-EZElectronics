@@ -33,7 +33,7 @@ class ProductController {
      */
     async registerProducts(model: string, category: string, quantity: number, details: string | null, sellingPrice: number, arrivalDate: string | null) /**:Promise<void> */ {
         const categoryEnum = category as Category
-        const product = new Product(sellingPrice, model, categoryEnum, arrivalDate ?? dayjs().format("YYYY-MM-DD"), details, quantity)
+        const product = new Product(sellingPrice, model, categoryEnum, arrivalDate || dayjs().format("YYYY-MM-DD"), details, quantity)
 
         return this.dao.createProduct(product)
     }
@@ -47,7 +47,7 @@ class ProductController {
      */
     async changeProductQuantity(model: string, newQuantity: number, changeDate: string | null) : Promise<number> {
         const product = await this.dao.getProduct(model);
-        const date = changeDate === null ? dayjs() : dayjs(changeDate);
+        const date = changeDate ? dayjs(changeDate) : dayjs();
 
         if (product === undefined) {
             throw new ProductNotFoundError();
@@ -73,7 +73,7 @@ class ProductController {
      */
     async sellProduct(model: string, quantity: number, sellingDate: string | null): Promise<number> {
         const product = await this.dao.getProduct(model);
-        const sellingDateParsed = sellingDate ?? dayjs().format("YYYY-MM-DD");
+        const sellingDateParsed = sellingDate || dayjs().format("YYYY-MM-DD");
 
         if (!product) {
             throw new ProductNotFoundError();
