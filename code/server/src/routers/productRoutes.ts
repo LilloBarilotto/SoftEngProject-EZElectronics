@@ -66,7 +66,7 @@ class ProductRoutes {
             body("quantity").isInt({min: 1}),
             body("details").isString().optional(),
             body("sellingPrice").isFloat({min: 0.01}),
-            body("arrivalDate").optional({nullable: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
+            body("arrivalDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
                 if (dayjs().isBefore(date, "day")) throw new DateError();
                 else return true;
             }),
@@ -89,7 +89,7 @@ class ProductRoutes {
             "/:model",
             (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             body("quantity").isInt({min: 1}),
-            body("changeDate").optional({nullable: true}).isDate({format: "YYYY-MM-DD"}),
+            body("changeDate").optional({checkFalsy: true}).isDate({format: "YYYY-MM-DD"}),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.changeProductQuantity(req.params.model, req.body.quantity, req.body.changeDate)
                 .then((quantity: number) => res.status(200).json({quantity: quantity}))
@@ -110,7 +110,7 @@ class ProductRoutes {
             (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
             param("model").isString().notEmpty({ignore_whitespace: true}),
             body("quantity").isInt({min: 1}),
-            body("sellingDate").optional({nullable: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
+            body("sellingDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
                 if (dayjs().isBefore(date, "day")) throw new DateError();
                 else return true;
             }),
