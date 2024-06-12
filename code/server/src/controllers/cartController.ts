@@ -136,7 +136,9 @@ class CartController {
      * @returns A Promise that resolves to `true` if the product was successfully removed.
      */
     async removeProductFromCart(user: User, productModel: string): Promise<boolean> {
-        await this.dao.removeProductFromCart(user.username, productModel);
+        const products =  await this.productController.getProducts("model", null, productModel);
+        const product =  products[0];
+        await this.dao.removeProductFromCart(user.username, productModel, product.sellingPrice);
          return true;
     }
 

@@ -90,7 +90,6 @@ class CartDAO {
                 [cart.id, product.model, product.quantity]
             );
         }
-
         cart.total += product.price;
         await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
@@ -191,12 +190,11 @@ class CartDAO {
 
  
 
-    async removeProductFromCart(customer: string, productModel: string): Promise<void> {
+    async removeProductFromCart(customer: string, productModel: string, price: number): Promise<void> {
         const cart = await this.getCart(customer);
         if (!cart || Utility.isEmpty(cart)) {
             throw new CartNotFoundError();
         }
-
         const productIndex = cart.products.findIndex((p) => p.model === productModel);
         if (productIndex === -1) {
             throw new ProductNotInCartError();
@@ -213,8 +211,7 @@ class CartDAO {
             cart.products.splice(productIndex, 1);
             await db.run(`DELETE FROM  product_in_cart WHERE cart_id = ? AND model = ?`, [cart.id, product.model]);
         }
-
-        cart.total -= product.price;
+        cart.total -= price;
         await db.run(`UPDATE carts SET total = ? WHERE id = ?`, [cart.total, cart.id]);
     }
 }
