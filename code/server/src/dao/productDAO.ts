@@ -13,7 +13,6 @@ class ProductDAO {
      * @returns A promise that resolves to true if the product has been created.
      */
     createProduct(product: Product): Promise<boolean> {
-        console.log("Product inserted as: " + product.arrivalDate)
         return new Promise<boolean>((resolve, reject) => {
             try {
                 const sql = "INSERT INTO products (model, selling_price, category, arrival_date, details, quantity) VALUES (?, ?, ?, ?, ?, ?)";

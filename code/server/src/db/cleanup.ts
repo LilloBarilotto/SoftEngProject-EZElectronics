@@ -38,3 +38,14 @@ export async function cleanup(): Promise<void> {
         });
     });
 }
+
+export async function cleanProducts(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        db.serialize(() => {
+            db.run("DELETE FROM products", (err) => {
+                if (err) reject(err);
+                resolve();
+            });
+        });
+    });
+}
