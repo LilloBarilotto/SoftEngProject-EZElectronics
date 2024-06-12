@@ -67,7 +67,11 @@ class ReviewDAO {
             try {
                 const sql = "INSERT INTO reviews (model, user, score, date, comment) VALUES (?, ?, ?, ?, ?)";
                 db.run(sql, [review.model, review.user, review.score, review.date, review.comment], function (err) {
-                    if(err) reject(err);
+                    if(err) {
+                        if(err.message.includes("UNIQUE constraint failed: reviews.user, reviews.model"))
+                            resolve(false);
+                        reject(err);
+                    }
                     if(this.changes !== 1){
                         resolve(false);
                     }
