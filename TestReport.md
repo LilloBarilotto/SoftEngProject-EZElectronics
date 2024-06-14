@@ -31,285 +31,297 @@
 
 <in the table below list the test cases defined For each test report the object tested, the test level (API, integration, unit) and the technique used to define the test case (BB/ eq partitioning, BB/ boundary, WB/ statement coverage, etc)> <split the table if needed>
 
-| Test case name | Object(s) tested | Test level | Technique used |
-| :------------: | :--------------: | :--------: | :------------: |
-|should delete all carts|CartController deleteAllCarts|Unit|WB|
-|should throw an error if deletion fails|CartController deleteAllCarts|Unit|WB|
-|should clear the cart if it exists|CartController clearCart|Unit|WB|
-|should throw CartNotFoundError if the cart does not exist|CartController clearCart|Unit|WB|
-|should retrieve all carts|CartController getCartsAll|Unit|WB|
-|should throw an error if retrieval fails|CartController getCartsAll|Unit|WB|
-|should retrieve all paid carts for a specific customer|CartController getAllCarts|Unit|WB|
-|should throw an error if retrieval fails|CartController getAllCarts|Unit|WB|
-|should checkout the cart if it exists and has products|CartController checkoutCart|Unit|WB|
-|should throw CartNotFoundError if the cart does not exist|CartController checkoutCart|Unit|WB|
-|should throw EmptyCartError if the cart is empty|CartController checkoutCart|Unit|WB|
-|Should return a cart if it exists|CartController getCart|Unit|WB|
-|should return an empty Cart if the cart does not exist|CartController getCart|Unit|WB|
-|should add a product to the cart if the cart exists|CartController addToCart|Unit|WB|
-|should remove one product unit from the cart|CartController getAllCarts|Unit|WB|
-|should throw CartNotFoundError if the cart does not exist|CartController getAllCarts|Unit|WB|
-|should throw ProductNotInCartError if the product is not in the cart|CartController getAllCarts|Unit|WB|
-|should throw an error if removal fails|CartController getAllCarts|Unit|WB|
-|should return true|registerProducts|Unit|WB|
-|should replace arrivalDate if null|registerProducts|Unit|WB|
-|should return true|deleteAllProducts|Unit|WB|
-|should return new quantity|changeProductQuantity|Unit|WB|
-|should throw ProductNotFoundError|changeProductQuantity|Unit|WB|
-|should throw ChangeDateAfterCurrentDateError|changeProductQuantity|Unit|WB|
-|should throw ChangeDateBeforeArrivalDateError|changeProductQuantity|Unit|WB|
-|should return an array of products|getProducts|Unit|WB|
-|should filter by category|getProducts|Unit|WB|
-|should filter by model|getProducts|Unit|WB|
-|should return an empty array|getProducts|Unit|WB|
-|should throw ProductNotFoundError|getProducts|Unit|WB|
-|should return an array of products|getAvailableProducts|Unit|WB|
-|should filter by category|getAvailableProducts|Unit|WB|
-|should filter by model|getAvailableProducts|Unit|WB|
-|should return an empty array|getAvailableProducts|Unit|WB|
-|should throw ProductNotFoundError|getAvailableProducts|Unit|WB|
-|should return true|deleteProduct|Unit|WB|
-|should throw ProductNotFoundError|deleteProduct|Unit|WB|
-|should return the new quantity of the product|sellProduct|Unit|WB|
-|should throw ProductNotFoundError|sellProduct|Unit|WB|
-|should throw DateError|sellProduct|Unit|WB|
-|should throw EmptyProductStockError|sellProduct|Unit|WB|
-|should throw LowProductStockError|sellProduct|Unit|WB|
-|should throw ProductNotFoundError|getProductReviews|Unit|WB|
-|should return a list of reviews|getProductReviews|Unit|WB|
-|should throw ProductNotFoundError|deleteReview|Unit|WB|
-|should throw NoReviewProductError|deleteReview|Unit|WB|
-|should return a promise that resolve nothing|deleteReview|Unit|WB|
-|should return a promise that resolve nothing|deleteAllReviews|Unit|WB|
-|should throw ExistingReviewError|addReview|Unit|WB|
-|should throw ProductNotFoundError|addReview|Unit|WB|
-|should throw ProductNotFoundError|deleteReviewsOfProduct|Unit|WB|
-|should return a promise that resolve nothing|deleteReviewsOfProduct|Unit|WB|
-|It should return an array of users|getUsers|Unit|WB|
-|Should return the user with the given username|getUserByUsername|Unit|WB|
-|Should return the user with the given username|getUserByUsername|Unit|WB|
-|Should return UnauthorizedUserError|getUserByUsername|Unit|WB|
-|Should return UnauthorizedUserError|getUserByUsername|Unit|WB|
-|It should return an array of users|getUsersByRole|Unit|WB|
-|Should return the user updated|UpdateUser|Unit|WB|
-|Should return the user updated | Admin change other NonAdmin|UpdateUser|Unit|WB|
-|Should return UserNotFoundError|UpdateUser|Unit|WB|
-|Should return BirthDateAfterCurrentDate Error|UpdateUser|Unit|WB|
-|Should return UnauthorizedUserError|UpdateUser|Unit|WB|
-|Should return UnauthorizedUserError | Admin try to update other Admin|UpdateUser|Unit|WB|
-|It should resolve true|Delete All users (Non Admin)|Unit|WB|
-|It should reject|Delete All users (Non Admin)|Unit|WB|
-|It should resolve true | Customer delete itself|Delete User|Unit|WB|
-|It should resolve true | Admin delete NonAdminUser|Delete User|Unit|WB|
-|It should reject with UnauthorizedUserError | Admin delete another Admin|Delete User|Unit|WB|
-|It should reject with UnauthorizedUserError | NonAdminUser delete another User|Delete User|Unit|WB|
-|It should reject with UserNotFoundError|Delete User|Unit|WB|
-|Should delete all carts and products in cart|CartDAO deleteAllCarts|Unit|WB|
-|should clear the cart if it exists|CartDAO clearCart|Unit|WB|
-|should retrieve all carts|CartDAO getCartsAll|Unit|WB|
-|should throw an error if retrieval fails|CartDAO getCartsAll|Unit|WB|
-|should throw an error if retrieval fails|CartDAO getAllCarts|Unit|WB|
-|should checkout the cart if it exists and has products|CartDAO checkoutCart|Unit|WB|
-|should throw EmptyCartError if the cart is empty|CartDAO checkoutCart|Unit|WB|
-|Should return a cart if it exists|CartDAO getCart|Unit|WB|
-|Should return empty cart object if the cart does not exist|CartDAO getCart|Unit|WB|
-|should add a product to an existing cart|CartDAO addProductToCart|Unit|WB|
-|should create a new cart and add the product if the cart does not exist|CartDAO addProductToCart|Unit|WB|
-|should remove one product unit from the cart|CartDAO getAllCarts|Unit|WB|
-|should throw CartNotFoundError if the cart does not exist|CartDAO getAllCarts|Unit|WB|
-|should throw ProductNotInCartError if the product is not in the cart|CartDAO getAllCarts|Unit|WB|
-|resolves true if product is inserted|createProduct|Unit|WB|
-|throws ProductAlreadyExistsError if product is already present in DB|createProduct|Unit|WB|
-|resolves true if product is updated|updateProduct|Unit|WB|
-|throws exception if DB error|updateProduct|Unit|WB|
-|resolves true if all products are deleted|deleteAllProducts|Unit|WB|
-|resolves an array of Product objects|getProducts|Unit|WB|
-|resolves an array of Product objects filtered by category|getProducts|Unit|WB|
-|resolves an array of Product objects filtered by model|getProducts|Unit|WB|
-|resolves an array of Product objects|getAvailableProducts|Unit|WB|
-|resolves an array of Product objects filtered by category|getAvailableProducts|Unit|WB|
-|resolves an array of Product objects filtered by model|getAvailableProducts|Unit|WB|
-|resolves true if product is deleted|deleteProduct|Unit|WB|
-|resolves true if product is sold|sellProduct|Unit|WB|
-|resolve a list of reviews if model matches with present models in the db|getAllByModel|Unit|WB|
-|should resolve the number of deleted rows|deleteByUser|Unit|WB|
-|should resolve the number of deleted rows|deleteAll|Unit|WB|
-|resolve true if review is inserted|create review|Unit|WB|
-|should resolve the number of deleted rows|deleteAllByModel|Unit|WB|
-|It should return an array of users with the userList|getUsers|Unit|WB|
-|It should return the user with the specified username|getUserByUsername|Unit|WB|
-|It should return UserNotFoundError if the user does not exist|getUserByUsername|Unit|WB|
-|It should return an array of users with the specified role|getUsersByRole|Unit|WB|
-|It should resolve with a user|updateUser|Unit|WB|
-|It should resolve true|Delete All users (Non Admin)|Unit|WB|
-|It should reject an error|Delete All users (Non Admin)|Unit|WB|
-|It should resolve true|Delete specific user by username|Unit|WB|
-|It should reject an error|Delete specific user by username|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes DELETE /carts|Unit|WB|
-|should clear the current cart|CartRoutes DELETE /carts/current|Unit|WB|
-|should return 404 if the cart does not exist|CartRoutes DELETE /carts/current|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes DELETE /carts/current|Unit|WB|
-|should retrieve all carts|CartRoutes GET /carts|Unit|WB|
-|should return 503 if retrieval fails|CartRoutes GET /carts|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes GET /carts|Unit|WB|
-|should retrieve the history of the logged in customers carts|CartRoutes GET /carts|Unit|WB|
-|should return 500 if retrieval fails|CartRoutes GET /carts|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes GET /carts|Unit|WB|
-|should checkout the cart|CartRoutes PATCH /carts|Unit|WB|
-|should return 404 if the cart does not exist|CartRoutes PATCH /carts|Unit|WB|
-|should return 400 if the cart is empty|CartRoutes PATCH /carts|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes PATCH /carts|Unit|WB|
-|should return a cart if it exists|CartRoutes GET /carts|Unit|WB|
-|should return any empty cart if the cart does not exist|CartRoutes GET /carts|Unit|WB|
-|should return 404 if none of cart does not exist|CartRoutes GET /carts|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes GET /carts|Unit|WB|
-|should add a product to the cart|CartRoutes POST /carts|Unit|WB|
-|should return 422 if product model is not provided|CartRoutes POST /carts|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes POST /carts|Unit|WB|
-|should remove one product unit from the cart|CartRoutes POST /carts|Unit|WB|
-|should return 404 if the cart does not exist|CartRoutes POST /carts|Unit|WB|
-|should return 404 if the product is not in the cart|CartRoutes POST /carts|Unit|WB|
-|should return 500 if removal fails|CartRoutes POST /carts|Unit|WB|
-|should return 401 for unauthorized access|CartRoutes POST /carts|Unit|WB|
-|should return a 200 success code|POST /ezelectronics/products|Unit|WB|
-|should return a 200 success code with null arrivalDate|POST /ezelectronics/products|Unit|WB|
-|should return a 401 response code if user is not a manager|POST /ezelectronics/products|Unit|WB|
-|should return a 409 response code if the product already exists|POST /ezelectronics/products|Unit|WB|
-|should return a 422 response code if the arrivalDate is after today|POST /ezelectronics/products|Unit|WB|
-|should return a 401 status code|DELETE /products|Unit|WB|
-|should return a 200 success code|DELETE /products|Unit|WB|
-|should return a 200 success code with changeDate|PATCH /ezelectronics/products/:model|Unit|WB|
-|should return a 200 success code without changeDate|PATCH /ezelectronics/products/:model|Unit|WB|
-|should return a 404 response code if the product does not exist|PATCH /ezelectronics/products/:model|Unit|WB|
-|should return a 401 status code if not admin nor manager|GET /ezelectronics/products|Unit|WB|
-|should return a 200 success code|GET /ezelectronics/products|Unit|WB|
-|should return a 200 success code with a category filter|GET /ezelectronics/products|Unit|WB|
-|should return a 200 success code with a model filter|GET /ezelectronics/products|Unit|WB|
-|should return a 404 response code if ProductNotFoundError is thrown|GET /ezelectronics/products|Unit|WB|
-|should return a 401 status code if not logged in|GET /ezelectronics/products/available|Unit|WB|
-|should return a 200 success code|GET /ezelectronics/products/available|Unit|WB|
-|should return a 200 success code with a category filter|GET /ezelectronics/products/available|Unit|WB|
-|should return a 200 success code with a model filter|GET /ezelectronics/products/available|Unit|WB|
-|should return a 404 response code if ProductNotFoundError is thrown|GET /ezelectronics/products/available|Unit|WB|
-|should return a 200 success code|DELETE /ezelectronics/products/:model|Unit|WB|
-|should return a 401 response code if user is not a manager nor an admin|DELETE /ezelectronics/products/:model|Unit|WB|
-|should return a 404 response code if the product does not exist|DELETE /ezelectronics/products/:model|Unit|WB|
-|should return a 200 success code|PATCH /ezelectronics/products/:model/sell|Unit|WB|
-|should return a 200 success code with empty sellingDate|PATCH /ezelectronics/products/:model/sell|Unit|WB|
-|should return a 401 response code if user is not a manager|PATCH /ezelectronics/products/:model/sell|Unit|WB|
-|should return a 401 response code if user is not authenticated|GET /ezelectronics/reviews/:model|Unit|WB|
-|should return 200 success code|GET /ezelectronics/reviews/:model|Unit|WB|
-|should return a 404 error code if if model does not exists|GET /ezelectronics/reviews/:model|Unit|WB|
-|should return a 401 response code if user is not customer|DELETE ezelectronics/reviews/:model|Unit|WB|
-|should return 200 success code|DELETE ezelectronics/reviews/:model|Unit|WB|
-|should return 404 error code if model does not exists|DELETE ezelectronics/reviews/:model|Unit|WB|
-|should return 404 error code if the current user does not have a review for the product identified by model|DELETE ezelectronics/reviews/:model|Unit|WB|
-|should return a 401 response code if user is not a manage nor an admin|DELETE ezelectronics/reviews|Unit|WB|
-|should return 200 success code|DELETE ezelectronics/reviews|Unit|WB|
-|should return a 401 response code if user is not a customer|POST /ezelectronics/:model|Unit|WB|
-|A validation error should occur|POST /ezelectronics/:model|Unit|WB|
-|should return 200 success code|POST /ezelectronics/:model|Unit|WB|
-|should return a 404 error if model does not exists|POST /ezelectronics/:model|Unit|WB|
-|should return a 409 error if there is an existing review for the product made by the customer|POST /ezelectronics/:model|Unit|WB|
-|should return a 401 response code if user is not a manage nor an admin|DELETE ezelectronics/reviews/:model/all|Unit|WB|
-|should return 200 success code|DELETE ezelectronics/reviews/:model/all|Unit|WB|
-|should return 404 error code if model does not exist|DELETE ezelectronics/reviews/:model/all|Unit|WB|
-|should return a 401 response code if user is not Admin|GET /ezelectronics/users|Unit|WB|
-|should return a 200 success code|GET /ezelectronics/users|Unit|WB|
-|A validation error should occur|POST /sessions|Unit|WB|
-|Unauthenticated user|DELETE /sessions/current|Unit|WB|
-|Unauthenticated user|GET /sessions/current|Unit|WB|
-|should return a 200 success code|GET /ezelectronics/users/:username|Unit|WB|
-|should return a 401 unauthorized code if not LoggedIn|GET /ezelectronics/users/:username|Unit|WB|
-|should return a 404 if user does not exist|GET /ezelectronics/users/:username|Unit|WB|
-|should return a 401 response code if user is not Admin|GET /ezelectronics/users/roles/:role|Unit|WB|
-|should return a 200 success code|GET /ezelectronics/users/roles/:role|Unit|WB|
-|should return a 422 response code if the role is not valid|GET /ezelectronics/users/roles/:role|Unit|WB|
-|should return a 401 unauthorized code if not LoggedIn|PATCH /ezelectronics/users/:username|Unit|WB|
-|It should return a 200 success code|DELETE /ezelectronics/users|Unit|WB|
-|It should return a 401 unauthorized code|DELETE /ezelectronics/users|Unit|WB|
-|should return a 200 success code|DELETE /ezelectronics/users/:username|Unit|WB|
-|should return a 401 unauthorized code|DELETE /ezelectronics/users/:username|Unit|WB|
-|It should return an empty cart for a new customer|GET /carts|Integration|BB|
-|It should add a product to the cart|POST /carts|Integration|BB|
-|It should return a 404 error if model does not represent an existing product|POST /carts|Integration|BB|
-|It should return a 409 error if model represents a product whose available quantity is 0|POST /carts|Integration|BB|
-|Should simulate payment for the cart|PATCH /ezelectronics/carts|Integration|BB|
-|It should return a 404 error if there is no information about an unpaid cart in the database|PATCH /ezelectronics/carts|Integration|BB|
-|It should return a 400 error if there is an unpaid cart but the cart contains no product|PATCH /ezelectronics/carts|Integration|BB|
-|It should return a 409 error if there is at least one product in the cart whose available quantity in the stock is 0|PATCH /ezelectronics/carts|Integration|BB|
-|It should return a 409 error if there is at least one product in the cart whose quantity is higher than the available quantity in the stock|PATCH /ezelectronics/carts|Integration|BB|
-|It should return the history of past orders|GET /carts/history|Integration|BB|
-|It should remove a product from the cart|DELETE /carts/products/:model|Integration|BB|
-|It should return a 404 error if the product is not in the cart|DELETE /carts/products/:model|Integration|BB|
-|It should empty the current cart|DELETE /carts/current|Integration|BB|
-|It should return a 404 error if there is no information about an unpaid cart for the user|DELETE /carts/current|Integration|BB|
-|It should delete all existing carts of all users|DELETE /carts|Integration|BB|
-|It should return a 401 error if the user is not Admin or Manager|DELETE /carts|Integration|BB|
-|It should return a 401 error if the user is not Admin or Manager|GET /carts/all|Integration|BB|
-|It should return all carts of all users|GET /carts/all|Integration|BB|
-|It should return a 401 status code|POST /ezelectronics/products|Integration|BB|
-|It should return a 200 status code|POST /ezelectronics/products|Integration|BB|
-|It should return a 200 status code with empty arrivalDate|POST /ezelectronics/products|Integration|BB|
-|It should return a 409 status code|POST /ezelectronics/products|Integration|BB|
-|It should return a 401 status code|PATCH /ezelectronics/products/:model|Integration|BB|
-|It should return a 200 status code|PATCH /ezelectronics/products/:model|Integration|BB|
-|It should return a 200 status code with empty changeDate|PATCH /ezelectronics/products/:model|Integration|BB|
-|It should return a 400 status code if changeDate is after today|PATCH /ezelectronics/products/:model|Integration|BB|
-|It should return a 400 status code if changeDate is before arrivalDate|PATCH /ezelectronics/products/:model|Integration|BB|
-|It should return a 401 status code|PATCH /ezelectronics/products/:model/sell|Integration|BB|
-|It should return a 200 status code|PATCH /ezelectronics/products/:model/sell|Integration|BB|
-|It should return a 200 status code with empty sellingDate|PATCH /ezelectronics/products/:model/sell|Integration|BB|
-|It should return a 404 status code|PATCH /ezelectronics/products/:model/sell|Integration|BB|
-|It should return a 409 status code|PATCH /ezelectronics/products/:model/sell|Integration|BB|
-|It should return a 400 status code|PATCH /ezelectronics/products/:model/sell|Integration|BB|
-|It should return a 401 status code|GET /ezelectronics/products|Integration|BB|
-|It should return a 200 status code|GET /ezelectronics/products|Integration|BB|
-|It should return a 200 status code with model filter|GET /ezelectronics/products|Integration|BB|
-|It should return a 200 status code with category filter|GET /ezelectronics/products|Integration|BB|
-|It should return a 401 status code|GET /ezelectronics/products/available|Integration|BB|
-|It should return a 200 status code|GET /ezelectronics/products/available|Integration|BB|
-|It should return a 200 status code with model filter|GET /ezelectronics/products/available|Integration|BB|
-|It should return a 200 status code with category filter|GET /ezelectronics/products/available|Integration|BB|
-|It should return a 401 status code|DELETE /ezelectronics/products/:model|Integration|BB|
-|It should return a 200 status code|DELETE /ezelectronics/products/:model|Integration|BB|
-|It should return a 404 status code|DELETE /ezelectronics/products/:model|Integration|BB|
-|It should return a 200 success code and add a new review|POST /reviews/:model|Integration|BB|
-|It should return a 404 error code if model does not represent an existing product in the database|POST /reviews/:model|Integration|BB|
-|It should return a 409 error code if there is an existing review for the product made by the customer|POST /reviews/:model|Integration|BB|
-|It should return a 422 error code if at least one request body parameter is empty/incorrect|POST /reviews/:model|Integration|BB|
-|It should return a 200 success code|GET /reviews/:model|Integration|BB|
-|It should return a 404 error code if model does not represent an existing product in the database|GET /reviews/:model|Integration|BB|
-|It should return a 401 error code if the user is unauthenticated|GET /reviews/:model|Integration|BB|
-|It should return a 200 success code|DELETE /reviews/:model|Integration|BB|
-|It should return a 404 error code if model does not represent an existing product in the database|DELETE /reviews/:model|Integration|BB|
-|It should return a 404 error code if the current user does not have a review for the product identified by model|DELETE /reviews/:model|Integration|BB|
-|It should return a 401 error code if the user is unauthenticated|DELETE /reviews/:model|Integration|BB|
-|It should return a 401 error code if the current user is not authorized|DELETE /reviews/:model|Integration|BB|
-|It should return a 200 success code|DELETE /reviews/:model/all|Integration|BB|
-|It should return a 404 error code if model does not represent an existing product in the database|DELETE /reviews/:model/all|Integration|BB|
-|It should return a 401 error code if the current user is not authorized|DELETE /reviews/:model/all|Integration|BB|
-|It should return a 200 success code|DELETE /reviews|Integration|BB|
-|It should return a 401 error code if the current user is not authorized|DELETE /reviews|Integration|BB|
-|It should return a 200 status code|POST /ezelectronics/sessions|Integration|BB|
-|It should return a 401 status code if the username does not exist|POST /ezelectronics/sessions|Integration|BB|
-|It should return a 401 status code if the password provided does not match the one in the database|POST /ezelectronics/sessions|Integration|BB|
-|It should return a 200 status code|DELETE /ezelectronics/sessions/current|Integration|BB|
-|It should return a 200 status code|GET /ezelectronics/sessions/current|Integration|BB|
-|POST /users|POST /users|Integration|BB|
-|POST /users - User already exists|POST /users|Integration|BB|
-|GET /users|GET /users|Integration|BB|
-|GET /users - Not Admin|GET /users|Integration|BB|
-|GET /users/:username|GET /users/:username|Integration|BB|
-|GET /users/:username - Not Admin|GET /users/:username|Integration|BB|
-|DEL /users/:username - Not Authorized|DEL /users/:username|Integration|BB|
-|DEL /users/:username - User does not exist|DEL /users/:username|Integration|BB|
-|DEL /users/:username|DEL /users/:username|Integration|BB|
-|DEL /users - Not Admin|DEL /users|Integration|BB|
-|DEL /users|DEL /users|Integration|BB|
-|PATCH /users/:username - Empty body|PATCH /users/:username|Integration|BB|
-|PATCH /users/:username|PATCH /users/:username|Integration|BB|
-|PATCH /users/:username - Not Authorized|PATCH /users/:username|Integration|BB|
+| ID  | Test case name | Object(s) tested | Test level | Technique used |
+|:----|:------------------:| :--------------: | :--------: | :------------: |
+| 1 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 2 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 3 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 4 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 5 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 6 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 7 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 8 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 9 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 10 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 11 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 12 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 13 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 14 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 15 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 16 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 17 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 18 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 19 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 20 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 21 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 22 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 23 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 24 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 25 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 26 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 27 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 28 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 29 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 30 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 31 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 32 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 33 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 34 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 35 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 36 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 37 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 38 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 39 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 40 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 41 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 42 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 43 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 44 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 45 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 46 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 47 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 48 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 49 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 50 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 51 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 52 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 53 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 54 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 55 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 56 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 57 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 58 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 59 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 60 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 61 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 62 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 63 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 64 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 65 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 66 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 67 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 68 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 69 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 70 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 71 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 72 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 73 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 74 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 75 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 76 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 77 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 78 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 79 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 80 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 81 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 82 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 83 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 84 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 85 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 86 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 87 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 88 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 89 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 90 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 91 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 92 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 93 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 94 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 95 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 96 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 97 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 98 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 99 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 100 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 101 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 102 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 103 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 104 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 105 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 106 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 107 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 108 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 109 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 110 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 111 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 112 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 113 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 114 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 115 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 116 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 117 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 118 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 119 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 120 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 121 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 122 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 123 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 124 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 125 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 126 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 127 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 128 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 129 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 130 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 131 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 132 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 133 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 134 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 135 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 136 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 137 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 138 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 139 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 140 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 141 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 142 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 143 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 144 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 145 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 146 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 147 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 148 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 149 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 150 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 151 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 152 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 153 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 154 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 155 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 156 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 157 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 158 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 159 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 160 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 161 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 162 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 163 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 164 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 165 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 166 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 167 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 168 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 169 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 170 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 171 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 172 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 173 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 174 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 175 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 176 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 177 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 178 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 179 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 180 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 181 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 182 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 183 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 184 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 185 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 186 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 187 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 188 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Unit | WB |
+| 189 | should return 200 success code | GET /ezelectronics/reviews/:model | Unit | WB |
+| 190 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Unit | WB |
+| 191 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 192 | should return 200 success code | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 193 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 194 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Unit | WB |
+| 195 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Unit | WB |
+| 196 | should return 200 success code | DELETE ezelectronics/reviews | Unit | WB |
+| 197 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Unit | WB |
+| 198 | A validation error should occur | POST /ezelectronics/:model | Unit | WB |
+| 199 | should return 200 success code | POST /ezelectronics/:model | Unit | WB |
+| 200 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Unit | WB |
+| 201 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Unit | WB |
+| 202 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 203 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 204 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Unit | WB |
+| 205 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Integration | BB |
+| 206 | should return 200 success code | GET /ezelectronics/reviews/:model | Integration | BB |
+| 207 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Integration | BB |
+| 208 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 209 | should return 200 success code | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 210 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 211 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 212 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Integration | BB |
+| 213 | should return 200 success code | DELETE ezelectronics/reviews | Integration | BB |
+| 214 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Integration | BB |
+| 215 | A validation error should occur | POST /ezelectronics/:model | Integration | BB |
+| 216 | should return 200 success code | POST /ezelectronics/:model | Integration | BB |
+| 217 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Integration | BB |
+| 218 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Integration | BB |
+| 219 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 220 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 221 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 222 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Integration | BB |
+| 223 | should return 200 success code | GET /ezelectronics/reviews/:model | Integration | BB |
+| 224 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Integration | BB |
+| 225 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 226 | should return 200 success code | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 227 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 228 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 229 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Integration | BB |
+| 230 | should return 200 success code | DELETE ezelectronics/reviews | Integration | BB |
+| 231 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Integration | BB |
+| 232 | A validation error should occur | POST /ezelectronics/:model | Integration | BB |
+| 233 | should return 200 success code | POST /ezelectronics/:model | Integration | BB |
+| 234 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Integration | BB |
+| 235 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Integration | BB |
+| 236 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 237 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 238 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 239 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Integration | BB |
+| 240 | should return 200 success code | GET /ezelectronics/reviews/:model | Integration | BB |
+| 241 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Integration | BB |
+| 242 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 243 | should return 200 success code | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 244 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 245 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 246 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Integration | BB |
+| 247 | should return 200 success code | DELETE ezelectronics/reviews | Integration | BB |
+| 248 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Integration | BB |
+| 249 | A validation error should occur | POST /ezelectronics/:model | Integration | BB |
+| 250 | should return 200 success code | POST /ezelectronics/:model | Integration | BB |
+| 251 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Integration | BB |
+| 252 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Integration | BB |
+| 253 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 254 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 255 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 256 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Integration | BB |
+| 257 | should return 200 success code | GET /ezelectronics/reviews/:model | Integration | BB |
+| 258 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Integration | BB |
+| 259 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 260 | should return 200 success code | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 261 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 262 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 263 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Integration | BB |
+| 264 | should return 200 success code | DELETE ezelectronics/reviews | Integration | BB |
+| 265 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Integration | BB |
+| 266 | A validation error should occur | POST /ezelectronics/:model | Integration | BB |
+| 267 | should return 200 success code | POST /ezelectronics/:model | Integration | BB |
+| 268 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Integration | BB |
+| 269 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Integration | BB |
+| 270 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 271 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 272 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 273 | should return a 401 response code if user is not authenticated | GET /ezelectronics/reviews/:model | Integration | BB |
+| 274 | should return 200 success code | GET /ezelectronics/reviews/:model | Integration | BB |
+| 275 | should return a 404 error code if if model does not exists | GET /ezelectronics/reviews/:model | Integration | BB |
+| 276 | should return a 401 response code if user is not customer | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 277 | should return 200 success code | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 278 | should return 404 error code if model does not exists | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 279 | should return 404 error code if the current user does not have a review for the product identified by model | DELETE ezelectronics/reviews/:model | Integration | BB |
+| 280 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews | Integration | BB |
+| 281 | should return 200 success code | DELETE ezelectronics/reviews | Integration | BB |
+| 282 | should return a 401 response code if user is not a customer | POST /ezelectronics/:model | Integration | BB |
+| 283 | A validation error should occur | POST /ezelectronics/:model | Integration | BB |
+| 284 | should return 200 success code | POST /ezelectronics/:model | Integration | BB |
+| 285 | should return a 404 error if model does not exists | POST /ezelectronics/:model | Integration | BB |
+| 286 | should return a 409 error if there is an existing review for the product made by the customer | POST /ezelectronics/:model | Integration | BB |
+| 287 | should return a 401 response code if user is not a manage nor an admin | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 288 | should return 200 success code | DELETE ezelectronics/reviews/:model/all | Integration | BB |
+| 289 | should return 404 error code if model does not exist | DELETE ezelectronics/reviews/:model/all | Integration | BB |
 
 # Coverage
 
