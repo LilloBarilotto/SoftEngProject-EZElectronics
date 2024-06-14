@@ -89,7 +89,7 @@ class UserDAO {
                         return
                     }
                     if (!row) {
-                        resolve(undefined)
+                        reject(new UserNotFoundError())
                         return
                     }
                     const user: User = new User(row.username, row.name, row.surname, row.role, row.address, row.birthdate)
