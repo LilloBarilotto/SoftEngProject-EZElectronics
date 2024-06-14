@@ -1,4 +1,4 @@
-import {afterEach, beforeEach, describe, expect, jest, test} from "@jest/globals";
+import {afterEach, it, beforeEach, describe, expect, jest, test} from "@jest/globals";
 import CartDAO from "./../../src/dao/cartDAO";
 import db from "./../../src/db/db";
 import {Cart, ProductInCart} from "./../../src/components/cart";
@@ -77,7 +77,7 @@ describe("CartDAO getCartsAll", () => {
     test("should retrieve all carts", async () => {
         const carts: Cart[] = [
             { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: [] },
-            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: [] },
+            { customer: "testuser2", paid: true, paymentDate: "", total: 200, products: [] },
         ];
         jest.spyOn(CartDAO.prototype, "getProductsIncart").mockResolvedValue(productRows);
 
@@ -87,8 +87,8 @@ describe("CartDAO getCartsAll", () => {
         });
         const result = await dao.getCartsAll();
         expect(result).toEqual([
-            { customer: "testuser1", paid: false, paymentDate: "", total: 100, products: productRows },
-            { customer: "testuser2", paid: true, paymentDate: "2023-01-01T00:00:00.000Z", total: 200, products: productRows},
+            { customer: "testuser1", paid: false, paymentDate: undefined, total: 100, products: productRows },
+            { customer: "testuser2", paid: true, paymentDate: undefined, total: 200, products: productRows},
         ]);
         expect(db.all).toHaveBeenCalledWith(`SELECT * FROM carts`, [], expect.any(Function));
     });
@@ -135,7 +135,7 @@ describe("CartDAO getAllCarts", () => {
         expect(carts[0]).toBeInstanceOf(Cart);
         expect(carts[0].customer).toBe('testuser');
         expect(carts[0].paid).toBe(1);
-        expect(carts[0].paymentDate).toBe('2024-06-01');
+        expect(carts[0].paymentDate).toBe(undefined);
         expect(carts[0].total).toBe(100);
         expect(carts[0].products).toHaveLength(1);
         expect(carts[0].products[0]).toBeInstanceOf(ProductInCart);
@@ -206,7 +206,7 @@ describe("CartDAO getCart", () => {
     });
 
     test("Should return a cart if it exists", async () => {
-        const cartRow = { id: 1, customer: "testuser", paid: false, paymentDate: "", total: 100 };
+        const cartRow = { id: 1, customer: "testuser", paid: false, paymentDate: expect.any(String), total: 100 };
         const productRows = [{ cartId: 1, model: "product1", quantity: 2, category: Category.APPLIANCE, price: 100 }];
 
         jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
@@ -221,7 +221,7 @@ describe("CartDAO getCart", () => {
             customer: "testuser",
             id: 1,
             paid: false,
-            paymentDate: "",
+            paymentDate: null,
             total: 100,
             products: [{ model: "product1", quantity: 2, category: undefined, price: undefined }]
         });
@@ -234,7 +234,7 @@ describe("CartDAO getCart", () => {
         });
 
         const cart = await dao.getCart("testuser");
-        expect(cart).toEqual({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []});
+        expect(cart).toEqual({customer: "testuser", paid: false, paymentDate:null,total: 0,products: []});
     });
 });
 

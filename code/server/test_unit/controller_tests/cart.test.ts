@@ -165,7 +165,7 @@ describe("CartController checkoutCart", () => {
         jest.spyOn(CartDAO.prototype, "checkoutCart").mockResolvedValue();
 
         const result = await controller.checkoutCart(user);
-        expect(result).toBe(true);
+        expect(result).toBe(undefined);
         expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
         expect(CartDAO.prototype.checkoutCart).toHaveBeenCalledWith(user.username);
     });
@@ -240,7 +240,7 @@ describe("CartController getCart", () => {
         jest.spyOn(CartDAO.prototype, "getCart").mockResolvedValue({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []});
 
         const result =  await  controller.getCart(user);
-        expect(result).toEqual({customer: "testuser", paid: false, paymentDate: "",total: 0,products: []})
+        expect(result).toEqual({customer: "testuser", paid: false, paymentDate: null,total: 0,products: []})
         expect(CartDAO.prototype.getCart).toHaveBeenCalledWith(user.username);
     });
 });

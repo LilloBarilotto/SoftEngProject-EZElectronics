@@ -30,8 +30,11 @@ class CartController {
      * @returns A Promise that resolves to `true` if the product was successfully added.
      */
     async addToCart(user: User, productModel: string): Promise<boolean> {
-        const products =  await this.productController.getAvailableProducts("model", null, productModel);
+        const products =  await this.productController.getProducts("model", null, productModel);
         const productDetails = products[0];  // Assuming the first product is the desired one
+        if(productDetails.quantity <= 0){
+            throw new EmptyProductStockError();
+        }
         const product = new ProductInCart(productDetails.model, 1, productDetails.category, productDetails.sellingPrice);
         try {
             await this.dao.addProductToCart(user.username, product);
@@ -48,11 +51,12 @@ class CartController {
      * @returns A Promise that resolves to the user's cart or an empty one if there is no current cart.
      */
     async getCart(user: User): Promise<Cart> {
-            const cart = await this.dao.getCart(user.username);
-             cart.products =  await this.getProductsInCart(cart);
+            let cart = await this.dao.getCart(user.username);
+            cart.products =  await this.getProductsInCart(cart);
             if (!cart) {
                 throw new CartNotFoundError();
             }
+            cart = Utility.formatCart(cart);
         return cart;
     }
 
@@ -81,7 +85,7 @@ class CartController {
      * @returns A Promise that resolves to `true` if the cart was successfully checked out.
      * 
      */
-    async checkoutCart(user: User): Promise<boolean> {
+    async checkoutCart(user: User): Promise<void> {
         try {
             const cart = await this.dao.getCart(user.username);
             if (!cart || Utility.isEmpty(cart)) {
@@ -105,7 +109,6 @@ class CartController {
                  await this.productController.sellProduct(productInCart.model, productInCart.quantity ,dayjs().format('YYYY-MM-DD'));
             }
             await this.dao.checkoutCart(user.username);
-            return true;
         } catch (error) {
             if (error instanceof CartNotFoundError || error instanceof EmptyCartError || error instanceof EmptyProductStockError || error instanceof LowProductStockError) {
                 throw error;
@@ -122,9 +125,10 @@ class CartController {
      * Only the carts that have been checked out should be returned, the current cart should not be included in the result.
      */
     async getCustomerCarts(user: User): Promise<Cart[]> {
-        const carts = await this.dao.getAllCarts(user.username);
+        let carts = await this.dao.getAllCarts(user.username);
         for(let i= 0;i<carts.length;i++){
             carts[i].products =  await this.getProductsInCart(carts[i]);
+            carts[i] =  Utility.formatCart(carts[i]);
         }
         return carts;
     }
@@ -171,9 +175,10 @@ class CartController {
      */
     async getAllCarts(): Promise<Cart[]> {
         try {
-            const carts = await this.dao.getCartsAll();
+            let carts = await this.dao.getCartsAll();
             for(let i= 0;i<carts.length;i++){
                 carts[i].products =  await this.getProductsInCart(carts[i]);
+                carts[i]= Utility.formatCart(carts[i]);
             }
             return carts;
         } catch (error) {

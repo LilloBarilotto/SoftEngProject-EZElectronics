@@ -27,7 +27,15 @@ class Utility {
         return user.role === Role.ADMIN
     }
     static isEmpty(cart: Cart): boolean {
-        return !cart.paid && cart.paymentDate === "" && cart.total === 0 && cart.products.length === 0;
+        console.log("If empty")
+        console.log(cart)
+        return !cart.paid && cart.paymentDate === null && cart.total === 0 && cart.products.length === 0;
+    }
+    static formatCart(cart:Cart): Cart{
+        cart.paid = cart.paid ? true : false;
+        cart.id= undefined;
+        if(cart.paymentDate == ""){cart.paymentDate = null;}
+        return cart;
     }
 }
 
