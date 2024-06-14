@@ -349,7 +349,7 @@ describe("Delete User", () => {
         const controller = new UserController();
 
         jest.spyOn(Authenticator.prototype, "isLoggedIn").mockResolvedValueOnce(true);
-        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockResolvedValueOnce(undefined);
+        jest.spyOn(UserDAO.prototype, "getUserByUsername").mockRejectedValueOnce(new UserNotFoundError());
         jest.spyOn(UserDAO.prototype, "deleteUser").mockResolvedValueOnce(true);
 
         const result = controller.deleteUser(userList[0], "nonExistingUser");

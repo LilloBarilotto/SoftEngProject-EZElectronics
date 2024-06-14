@@ -88,14 +88,14 @@ describe("getUserByUsername", () => {
         expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE username = ?", [userList[0].username], expect.any(Function))
     })
 
-    test("It should return empty object if the user does not exist", async () => {
+    test("It should return UserNotFoundError if the user does not exist", async () => {
         const userDAO = new UserDAO()
         const mockDBGet = jest.spyOn(db, "get").mockImplementation((sql, params, callback) => {
             callback(null, undefined)
             return {} as Database
         })
         
-        await expect(userDAO.getUserByUsername("username4")).resolves.toEqual(undefined);
+        await expect(userDAO.getUserByUsername("username4")).rejects.toThrow(UserNotFoundError);
         
         expect(mockDBGet).toHaveBeenCalledTimes(1);
         expect(mockDBGet).toHaveBeenCalledWith("SELECT * FROM users WHERE username = ?", ["username4"], expect.any(Function))
