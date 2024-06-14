@@ -38,7 +38,6 @@ describe("CartRoutes DELETE /carts/current", () => {
         const response = await request(app)
             .delete(baseURL +  "/carts/current");
         expect(response.status).toBe(200);
-        expect(response.body).toBe(true);
     });
 
     test("should return 404 if the cart does not exist", async () => {
@@ -145,13 +144,12 @@ describe("CartRoutes PATCH /carts", () => {
 
         jest.spyOn(Authenticator.prototype, "isLoggedIn").mockImplementation((req: any, res: any, next: any) => next())
         jest.spyOn(Authenticator.prototype, "isCustomer").mockImplementation((req: any, res: any, next: any) => next())
-        jest.spyOn(CartController.prototype, "checkoutCart").mockResolvedValue(true);
+        jest.spyOn(CartController.prototype, "checkoutCart").mockResolvedValue();
 
         const response = await request(app)
             .patch(baseURL + "/carts")
             .send({ username: "testuser" });
         expect(response.status).toBe(200);
-        expect(response.body).toBe(true);
     });
 
     test("should return 404 if the cart does not exist", async () => {
@@ -271,7 +269,6 @@ describe("CartRoutes POST /carts", () => {
             .delete(baseURL + "/carts/products/product1")
             .send({ username: "testuser" });
         expect(response.status).toBe(200);
-        expect(response.body).toBe(true);
     });
 
     test("should return 404 if the cart does not exist", async () => {

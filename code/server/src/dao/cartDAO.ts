@@ -3,6 +3,7 @@ import { Cart, ProductInCart } from "../components/cart";
 import { Category } from "../components/product";
 import { CartNotFoundError, EmptyCartError, ProductNotInCartError } from "../errors/cartError";
 import { Utility } from "../utilities";
+import dayjs from "dayjs";
 
 /**
  * A class that implements the interaction with the database for all cart-related operations.
@@ -35,7 +36,7 @@ class CartDAO {
             
             if (!cartRow) {
               
-                return new Cart(customer, false, "", 0, []);
+                return new Cart(customer, false, null, 0, []);
             }
           
            
@@ -50,7 +51,7 @@ class CartDAO {
             cart.products = productsInCart.map(
                 (r) => new ProductInCart(r.model, r.quantity, undefined, undefined)
             );
-          
+            cart.paymentDate = null;
             return cart;
         } catch (error) {
             throw error;
@@ -108,11 +109,11 @@ class CartDAO {
 
     async getCartsAll(): Promise<Cart[]> {
         return new Promise((resolve, reject) => {
-            db.all(`SELECT * FROM carts`, [], async (err, rows: Cart[]) => {
+            db.all(`SELECT * FROM carts`, [], async (err, rows: any[]) => {
                 if (err) {
                     return reject(err);
                 }
-                const carts: Cart[] = rows.map(row => new Cart(row.customer, row.paid, row.paymentDate, row.total, [], row.id));
+                const carts: Cart[] = rows.map(row => new Cart(row.customer, row.paid, row.payment_date, row.total, [], row.id));
                 for(let i =0;i<carts.length;i++){
                     carts[i].products =  await this.getProductsIncart(carts[i].id);
                 }
@@ -133,7 +134,7 @@ class CartDAO {
                     try {
                         const carts: Cart[] = [];
                         for (const row of rows) {
-                            const cart = new Cart(row.customer, row.paid, row.paymentDate, row.total, []);
+                            const cart = new Cart(row.customer, row.paid, row.payment_date, row.total, []);
                             const productsInCart = await new Promise<ProductInCart[]>((resolve, reject) => {
                                 db.all(
                                     `SELECT * FROM  product_in_cart WHERE cart_id = ?`,
@@ -169,7 +170,8 @@ class CartDAO {
         }
 
         cart.paid = true;
-        cart.paymentDate = new Date().toISOString();
+        const date = dayjs();
+        cart.paymentDate = date.format("YYYY-MM-DD");
         await db.run(
             `UPDATE carts SET paid = ?, payment_date = ? WHERE id = ?`,
             [cart.paid, cart.paymentDate, cart.id]
