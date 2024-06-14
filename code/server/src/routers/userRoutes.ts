@@ -54,7 +54,7 @@ class UserRoutes {
          * - role: string (one of "Manager", "Customer", "Admin")
          * It returns a 200 status code.
          */
-        this.router.post(
+        this.router.post(   
             "/",
             (req: any, res: any, next: any) => this.controller.createUser(req.body.username, req.body.name, req.body.surname, req.body.password, req.body.role)
                 .then(() => res.status(200).end())
@@ -155,7 +155,7 @@ class UserRoutes {
             body("birthdate").isDate({ format: 'YYYY-MM-DD' }).notEmpty({ignore_whitespace: true}),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.updateUserInfo(req.user, req.body.name, req.body.surname, req.body.address, req.body.birthdate, req.params.username)
-                .then((user: any /**User */) => res.status(200).json(user))
+                .then((user: User ) => res.status(200).json(user))
                 .catch((err: any) => next(err))
         )
 
