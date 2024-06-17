@@ -50,14 +50,16 @@ class CartRoutes {
          */
         this.router.get(
             "/",
-            (req: any, res: any, next: any) => this.controller.getCart(req.user)
-                .then((cart: any /**Cart */) => {
-                    res.status(200).json(cart)
-                })
-                .catch((err) => {
-                    next(err)
-                })
-        )
+            (req: any, res: any, next: any) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const cart = await this.controller.getCart(req.user);
+                    res.status(200).json(cart);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for adding a product unit to the cart of the logged in customer.
@@ -68,12 +70,17 @@ class CartRoutes {
          */
         this.router.post(
             "/",
-            (req: any, res: any, next: any) => this.controller.addToCart(req.user, req.body.model)
-                .then(() => res.status(200).end())
-                .catch((err) => {
-                    next(err)
-                })
-        )
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            body("model").isString().notEmpty(),
+            (req, res, next) => this.errorHandler.validateRequest(req, res, next),
+            (req: any, res: any, next: any) => {
+                this.controller.addToCart(req.user, req.body.model)
+                    .then(() => res.status(200).end())
+                    .catch((err) => {
+                        next(err);
+                    });
+            }
+        );
 
         /**
          * Route for checking out the cart of the logged in customer.
@@ -83,12 +90,14 @@ class CartRoutes {
          */
         this.router.patch(
             "/",
-            (req: any, res: any, next: any) => this.controller.checkoutCart(req.user)
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => { this.controller.checkoutCart(req.user)
                 .then(() => res.status(200).end())
                 .catch((err) => {
-                    next(err)
-                })
-        )
+                    next(err);
+                });
+            }
+        );
 
         /**
          * Route for getting the history of the logged in customer's carts.
@@ -97,10 +106,16 @@ class CartRoutes {
          */
         this.router.get(
             "/history",
-            (req: any, res: any, next: any) => this.controller.getCustomerCarts(req.user)
-                .then((carts: any /**Cart[] */) => res.status(200).json(carts))
-                .catch((err) => next(err))
-        )
+            (req: any, res: any, next: any) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const carts = await this.controller.getCustomerCarts(req.user);
+                    res.status(200).json(carts);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
 
         /**
          * Route for removing a product unit from a cart.
@@ -110,12 +125,16 @@ class CartRoutes {
          */
         this.router.delete(
             "/products/:model",
-            (req: any, res: any, next: any) => this.controller.removeProductFromCart(req.user, req.params.model)
+            (req, res, next) => this.authenticator.isCustomer(req, res, next),
+            param("model").isString().notEmpty(),
+	        (req, res, next) => this.errorHandler.validateRequest(req, res, next),
+            async (req: any, res: any, next: any) => {this.controller.removeProductFromCart(req.user, req.params.model)
                 .then(() => res.status(200).end())
                 .catch((err) => {
-                    next(err)
-                })
-        )
+                    next(err);
+                });
+            }
+        );
 
         /**
          * Route for removing all products from the current cart.
@@ -125,10 +144,14 @@ class CartRoutes {
          */
         this.router.delete(
             "/current",
-            (req: any, res: any, next: any) => this.controller.clearCart(req.user)
+            (req: any, res: any, next: any) => this.authenticator.isCustomer(req, res, next),
+            async (req: any, res: any, next: any) => {this.controller.clearCart(req.user)
                 .then(() => res.status(200).end())
-                .catch((err) => next(err))
-        )
+                .catch((err) => {
+                    next(err);
+                });
+            }
+        );
 
         /**
          * Route for deleting all carts.
@@ -137,10 +160,17 @@ class CartRoutes {
          */
         this.router.delete(
             "/",
-            (req: any, res: any, next: any) => this.controller.deleteAllCarts()
-                .then(() => res.status(200).end())
-                .catch((err: any) => next(err))
-        )
+            (req, res, next) => this.authenticator.isAdminOrManager(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const result = await this.controller.deleteAllCarts();
+                    res.status(200).json(result);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
+    
 
         /**
          * Route for retrieving all carts of all users
@@ -149,10 +179,16 @@ class CartRoutes {
          */
         this.router.get(
             "/all",
-            (req: any, res: any, next: any) => this.controller.getAllCarts()
-                .then((carts: any/**Cart[] */) => res.status(200).json(carts))
-                .catch((err: any) => next(err))
-        )
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            async (req: any, res: any, next: any) => {
+                try {
+                    const carts = await this.controller.getAllCarts();
+                    res.status(200).json(carts);
+                } catch (err) {
+                    next(err);
+                }
+            }
+        );
     }
 }
 

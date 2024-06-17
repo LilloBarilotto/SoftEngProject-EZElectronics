@@ -4,6 +4,7 @@ import { Category } from "./product"
  * Represents a shopping cart.
  */
 class Cart {
+    id?: number;
     customer: string
     paid: boolean
     paymentDate: string
@@ -18,12 +19,15 @@ class Cart {
      * @param total - The total amount of the cart. It corresponds to the sum of the prices of all the products in the cart, computed as price * quantity.
      * @param products - The products in the cart.
      */
-    constructor(customer: string, paid: boolean, paymentDate: string, total: number, products: ProductInCart[]) {
+    constructor(customer: string, paid: boolean, paymentDate: string, total: number, products: ProductInCart[], id?: number) {
         this.customer = customer
         this.paid = paid
         this.paymentDate = paymentDate
         this.total = total
         this.products = products
+        if (id) {
+            this.id = id;
+        }
     }
 }
 
@@ -52,3 +56,4 @@ class ProductInCart {
 }
 
 export { Cart, ProductInCart }
+

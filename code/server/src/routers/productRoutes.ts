@@ -1,9 +1,11 @@
 import express, { Router } from "express"
 import ErrorHandler from "../helper"
-import { body, param, query } from "express-validator"
+import {body, param, query} from "express-validator"
 import ProductController from "../controllers/productController"
 import Authenticator from "./auth"
-import { Product } from "../components/product"
+import dayjs from "dayjs";
+import {DateError} from "../utilities";
+import {Product} from "../components/product";
 
 /**
  * Represents a class that defines the routes for handling proposals.
@@ -36,11 +38,11 @@ class ProductRoutes {
 
     /**
      * Initializes the routes for the product router.
-     * 
+     *
      * @remarks
      * This method sets up the HTTP routes for handling product-related operations such as registering products, registering arrivals, selling products, retrieving products, and deleting products.
      * It can (and should!) apply authentication, authorization, and validation middlewares to protect the routes.
-     * 
+     *
      */
     initRoutes() {
 
@@ -58,6 +60,17 @@ class ProductRoutes {
          */
         this.router.post(
             "/",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            body("model").isString().notEmpty(),
+            body("category").isString().isIn(["Smartphone", "Laptop", "Appliance"]),
+            body("quantity").isInt({min: 1}),
+            body("details").isString().optional(),
+            body("sellingPrice").isFloat({min: 0.01}),
+            body("arrivalDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
+                if (dayjs().isBefore(date, "day")) throw new DateError();
+                else return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.registerProducts(req.body.model, req.body.category, req.body.quantity, req.body.details, req.body.sellingPrice, req.body.arrivalDate)
                 .then(() => res.status(200).end())
                 .catch((err) => next(err))
@@ -74,8 +87,12 @@ class ProductRoutes {
          */
         this.router.patch(
             "/:model",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            body("quantity").isInt({min: 1}),
+            body("changeDate").optional({checkFalsy: true}).isDate({format: "YYYY-MM-DD"}),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.changeProductQuantity(req.params.model, req.body.quantity, req.body.changeDate)
-                .then((quantity: any /**number */) => res.status(200).json({ quantity: quantity }))
+                .then((quantity: number) => res.status(200).json({quantity: quantity}))
                 .catch((err) => next(err))
         )
 
@@ -90,10 +107,17 @@ class ProductRoutes {
          */
         this.router.patch(
             "/:model/sell",
+            (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
+            param("model").isString().notEmpty({ignore_whitespace: true}),
+            body("quantity").isInt({min: 1}),
+            body("sellingDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
+                if (dayjs().isBefore(date, "day")) throw new DateError();
+                else return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.sellProduct(req.params.model, req.body.quantity, req.body.sellingDate)
-                .then((quantity: any /**number */) => res.status(200).json({ quantity: quantity }))
+                .then((quantity: number) => res.status(200).json({quantity: quantity}))
                 .catch((err) => {
-                    console.log(err)
                     next(err)
                 })
         )
@@ -109,10 +133,34 @@ class ProductRoutes {
          */
         this.router.get(
             "/",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
+            query('grouping').optional({nullable: true}).isString().isIn(["category", "model"]).custom((grouping, {req}) => {
+                if (grouping == "model" && !req.query.model) throw new Error("Model must be present if grouping is model");
+                if (grouping == "category" && !req.query.category) throw new Error("Category must be present if grouping is category");
+                return true;
+            }),
+            query('category').optional().isString().isIn(["Smartphone", "Laptop", "Appliance"]).custom((category, {req}) => {
+                if (!req.query.grouping) throw new Error("Category cannot be present if grouping is disabled");
+                if (req.query.grouping === "model") throw new Error("Category cannot be present if grouping is model");
+                if (req.query.grouping === "category") {
+                    if (!category) throw new Error("Category must be present if grouping is category");
+                    if (req.query.model) throw new Error("Model cannot be present if grouping is category");
+                }
+                return true;
+            }),
+            query('model').optional().isString().notEmpty({ignore_whitespace: true}).custom((model, {req}) => {
+                if (!req.query.grouping) throw new Error("Model cannot be present if grouping is disabled");
+                if (req.query.grouping === "category") throw new Error("Model cannot be present if grouping is category");
+                if (req.query.grouping === "model") {
+                    if (!model) throw new Error("Model must be present if grouping is model");
+                    if (req.query.category) throw new Error("Category cannot be present if grouping is model");
+                }
+                return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.getProducts(req.query.grouping, req.query.category, req.query.model)
-                .then((products: any /*Product[]*/) => res.status(200).json(products))
+                .then((products: Product[]) => res.status(200).json(products))
                 .catch((err) => {
-                    console.log(err)
                     next(err)
                 })
         )
@@ -128,8 +176,33 @@ class ProductRoutes {
          */
         this.router.get(
             "/available",
+            (req: any, res: any, next: any) => this.authenticator.isLoggedIn(req, res, next),
+            query('grouping').optional({nullable: true}).isString().isIn(["category", "model"]).custom((grouping, {req}) => {
+                if (grouping == "model" && !req.query.model) throw new Error("Model must be present if grouping is model");
+                if (grouping == "category" && !req.query.category) throw new Error("Category must be present if grouping is category");
+                return true;
+            }),
+            query('category').optional().isString().isIn(["Smartphone", "Laptop", "Appliance"]).custom((category, {req}) => {
+                if (!req.query.grouping) throw new Error("Category cannot be present if grouping is disabled");
+                if (req.query.grouping === "model") throw new Error("Category cannot be present if grouping is model");
+                if (req.query.grouping === "category") {
+                    if (!category) throw new Error("Category must be present if grouping is category");
+                    if (req.query.model) throw new Error("Model cannot be present if grouping is category");
+                }
+                return true;
+            }),
+            query('model').optional().isString().notEmpty({ignore_whitespace: true}).custom((model, {req}) => {
+                if (!req.query.grouping) throw new Error("Model cannot be present if grouping is disabled");
+                if (req.query.grouping === "category") throw new Error("Model cannot be present if grouping is category");
+                if (req.query.grouping === "model") {
+                    if (!model) throw new Error("Model must be present if grouping is model");
+                    if (req.query.category) throw new Error("Category cannot be present if grouping is model");
+                }
+                return true;
+            }),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.getAvailableProducts(req.query.grouping, req.query.category, req.query.model)
-                .then((products: any/*Product[]*/) => res.status(200).json(products))
+                .then((products: Product[]) => res.status(200).json(products))
                 .catch((err) => next(err))
         )
 
@@ -140,6 +213,7 @@ class ProductRoutes {
          */
         this.router.delete(
             "/",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             (req: any, res: any, next: any) => this.controller.deleteAllProducts()
                 .then(() => res.status(200).end())
                 .catch((err: any) => next(err))
@@ -153,12 +227,11 @@ class ProductRoutes {
          */
         this.router.delete(
             "/:model",
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             (req: any, res: any, next: any) => this.controller.deleteProduct(req.params.model)
                 .then(() => res.status(200).end())
                 .catch((err: any) => next(err))
         )
-
-
     }
 }
 
