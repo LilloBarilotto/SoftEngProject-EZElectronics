@@ -290,7 +290,6 @@ describe("Cart routes integration tests", () => {
             const result = await request(app)
                 .delete(`${routePath}/carts/current`)
                 .set("Cookie", customer1Cookie);
-                console.log(result.body);
             expect(result.status).toBe(404);
         });
     });
