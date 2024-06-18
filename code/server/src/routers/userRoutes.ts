@@ -56,6 +56,12 @@ class UserRoutes {
          */
         this.router.post(   
             "/",
+            body("username").isString().notEmpty({ignore_whitespace: true}),
+            body("name").isString().notEmpty({ignore_whitespace: true}),
+            body("surname").isString().notEmpty({ignore_whitespace: true}),
+            body("password").isString().notEmpty({ignore_whitespace: true}),
+            body("role").isString().notEmpty().isIn(["Manager", "Customer", "Admin"]),
+            (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.createUser(req.body.username, req.body.name, req.body.surname, req.body.password, req.body.role)
                 .then(() => res.status(200).end())
                 .catch((err) => {
