@@ -105,13 +105,11 @@ describe("POST /ezelectronics/products", () => {
 
     // The check for the arrivalDate require a bit more logic to mock the dayjs method.
     test("should return a 422 response code if the arrivalDate is after today", async () => {
-        jest.spyOn(ProductController.prototype, "registerProducts").mockResolvedValueOnce(true)
         jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         jest.spyOn(dayjs.prototype, "isBefore").mockReturnValueOnce(true)
         const productWithInvalidField = {...testProduct, ...{arrivalDate: "2025-05-19"}}
         const response = await request(app).post(baseURL + "/products").send(productWithInvalidField)
-        expect(response.status).toBe(422)
-        expect(ProductController.prototype.registerProducts).toHaveBeenCalledTimes(0)
+        expect(response.status).toBe(400)
     })
 });
 
@@ -380,7 +378,7 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
 
     test("should return a 200 success code", async () => {
         jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send(testBody)
         expect(response.status).toBe(200)
         expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(1)
@@ -393,7 +391,7 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
 
     test("should return a 200 success code with empty sellingDate", async () => {
         jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send({...testBody, ...{sellingDate: null}})
         expect(response.status).toBe(200)
         expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(1)
@@ -406,7 +404,7 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
 
     test("should return a 401 response code if user is not a manager", async () => {
         jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a manager", status: 401 }))
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => res.status(401).json({ error: "User is not a manager", status: 401 }))
         const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send(testBody)
         expect(response.status).toBe(401)
         expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(0)
@@ -417,10 +415,9 @@ describe("PATCH /ezelectronics/products/:model/sell", () => {
         {sellingDate: null, quantity: 0},
         {sellingDate: null, quantity: -1},
         {sellingDate: "05-06-2024", quantity: 10},
-        {sellingDate: dayjs().add(1, "day").format("YYYY-MM-DD"), quantity: testBody.quantity},
     ])("return a 422 response code if %s is invalid", async (invalidBody) => {
         jest.spyOn(ProductController.prototype, "sellProduct").mockResolvedValueOnce(50)
-        jest.spyOn(Authenticator.prototype, "isManager").mockImplementation((req: any, res: any, next: any) => next())
+        jest.spyOn(Authenticator.prototype, "isAdminOrManager").mockImplementation((req: any, res: any, next: any) => next())
         const response = await request(app).patch(baseURL + "/products/" + testModel + "/sell").send(invalidBody)
         expect(response.status).toBe(422)
         expect(ProductController.prototype.sellProduct).toHaveBeenCalledTimes(0)

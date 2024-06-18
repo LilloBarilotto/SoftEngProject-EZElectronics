@@ -130,7 +130,8 @@ class ProductController {
     async getAvailableProducts(grouping: string | null, category: string | null, model: string | null): Promise<Product[]> {
         // Select the first not null value or undefined
         const filterValue = category ?? model ?? null;
-        if (grouping === "model" && !(await this.dao.getProduct(filterValue))) {
+        const product = await this.dao.getProduct(filterValue)
+        if (grouping === "model" && !product) {
             throw new ProductNotFoundError();
         }
 
