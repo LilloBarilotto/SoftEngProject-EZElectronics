@@ -21,13 +21,13 @@ export async function cleanup(): Promise<void> {
         db.serialize(() => {
             db.run("DELETE FROM users", (err) => {
                 if (err) reject(err);
-                db.run("DELETE FROM products", (err) => {
+                db.run("DELETE FROM product_in_cart", (err) => {
                     if (err) reject(err);
-                    db.run("DELETE FROM product_in_cart", (err) => {
+                    db.run("DELETE FROM reviews", (err) => {
                         if (err) reject(err);
                         db.run("DELETE FROM carts", (err) => {
                             if (err) reject(err);
-                            db.run("DELETE FROM reviews", (err) => {
+                            db.run("DELETE FROM products", (err) => {
                                 if (err) reject(err);
                                 resolve();
                             });
