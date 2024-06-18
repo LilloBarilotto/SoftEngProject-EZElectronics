@@ -27,8 +27,6 @@ class Utility {
         return user.role === Role.ADMIN
     }
     static isEmpty(cart: Cart): boolean {
-        console.log("If empty")
-        console.log(cart)
         return !cart.paid && cart.paymentDate === null && cart.total === 0 && cart.products.length === 0;
     }
     static formatCart(cart:Cart): Cart{

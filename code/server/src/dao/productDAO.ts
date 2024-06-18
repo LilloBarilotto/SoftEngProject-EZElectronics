@@ -81,8 +81,8 @@ class ProductDAO {
     updateProduct(model: String, quantity: number, changeDate: String): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             try {
-                const sql = "UPDATE products SET quantity = quantity + ?, arrival_date = ? WHERE model = ?";
-                db.run(sql, [quantity, changeDate, model], (err: Error | null) => {
+                const sql = "UPDATE products SET quantity = quantity + ? WHERE model = ?";
+                db.run(sql, [quantity, model], (err: Error | null) => {
                     if (err) {
                         reject(err)
                     }

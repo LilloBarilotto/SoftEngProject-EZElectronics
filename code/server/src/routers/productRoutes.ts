@@ -67,7 +67,7 @@ class ProductRoutes {
             body("details").isString().optional(),
             body("sellingPrice").isFloat({min: 0.01}),
             body("arrivalDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
-                if (dayjs().isBefore(date, "day")) throw new DateError();
+                if (isNaN(new Date(date).valueOf())) throw new DateError();
                 else return true;
             }),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
@@ -89,7 +89,10 @@ class ProductRoutes {
             "/:model",
             (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             body("quantity").isInt({min: 1}),
-            body("changeDate").optional({checkFalsy: true}).isDate({format: "YYYY-MM-DD"}),
+            body("changeDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
+                if (isNaN(new Date(date).valueOf())) throw new DateError();
+                else return true;
+            }),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
             (req: any, res: any, next: any) => this.controller.changeProductQuantity(req.params.model, req.body.quantity, req.body.changeDate)
                 .then((quantity: number) => res.status(200).json({quantity: quantity}))
@@ -107,11 +110,11 @@ class ProductRoutes {
          */
         this.router.patch(
             "/:model/sell",
-            (req: any, res: any, next: any) => this.authenticator.isManager(req, res, next),
+            (req: any, res: any, next: any) => this.authenticator.isAdminOrManager(req, res, next),
             param("model").isString().notEmpty({ignore_whitespace: true}),
             body("quantity").isInt({min: 1}),
             body("sellingDate").optional({checkFalsy: true}).matches(/\d{4}-\d{2}-\d{2}/).custom((date, {req}) => {
-                if (dayjs().isBefore(date, "day")) throw new DateError();
+                if (isNaN(new Date(date).valueOf())) throw new DateError();
                 else return true;
             }),
             (req: any, res: any, next: any) => this.errorHandler.validateRequest(req, res, next),
