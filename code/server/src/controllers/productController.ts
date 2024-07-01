@@ -4,9 +4,9 @@ import dayjs from "dayjs";
 import {
     ChangeDateAfterCurrentDateError,
     ChangeDateBeforeArrivalDateError,
-    ProductNotFoundError,
     EmptyProductStockError,
-    LowProductStockError
+    LowProductStockError,
+    ProductNotFoundError
 } from "../errors/productError";
 import {DateError} from "../utilities";
 
@@ -32,6 +32,9 @@ class ProductController {
      * @returns A Promise that resolves to nothing.
      */
     async registerProducts(model: string, category: string, quantity: number, details: string | null, sellingPrice: number, arrivalDate: string | null) /**:Promise<void> */ {
+        if (arrivalDate && dayjs().isBefore(arrivalDate, "day")) {
+            throw new DateError();
+        }
         const categoryEnum = category as Category
         const product = new Product(sellingPrice, model, categoryEnum, arrivalDate || dayjs().format("YYYY-MM-DD"), details, quantity)
 
@@ -52,10 +55,10 @@ class ProductController {
         if (product === undefined) {
             throw new ProductNotFoundError();
         }
-        if (date.isAfter(dayjs())) {
+        if (date.isAfter(dayjs(), "day")) {
             throw new ChangeDateAfterCurrentDateError();
         }
-        if (date.isBefore(dayjs(product.arrivalDate))) {
+        if (date.isBefore(dayjs(product.arrivalDate), "day")) {
             throw new ChangeDateBeforeArrivalDateError();
         }
 
@@ -73,6 +76,11 @@ class ProductController {
      */
     async sellProduct(model: string, quantity: number, sellingDate: string | null): Promise<number> {
         const product = await this.dao.getProduct(model);
+
+        if (sellingDate && dayjs().isBefore(sellingDate, "day")) {
+            throw new DateError();
+        }
+
         const sellingDateParsed = sellingDate || dayjs().format("YYYY-MM-DD");
 
         if (!product) {
@@ -122,11 +130,12 @@ class ProductController {
     async getAvailableProducts(grouping: string | null, category: string | null, model: string | null): Promise<Product[]> {
         // Select the first not null value or undefined
         const filterValue = category ?? model ?? null;
-        const products = await this.dao.getAvailableProducts(grouping, filterValue);
-        if (grouping === "model" && products.length === 0) {
+        const product = await this.dao.getProduct(filterValue)
+        if (grouping === "model" && !product) {
             throw new ProductNotFoundError();
         }
-        return products;
+
+        return await this.dao.getAvailableProducts(grouping, filterValue);
     }
 
     /**

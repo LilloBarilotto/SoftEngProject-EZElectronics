@@ -267,6 +267,7 @@ describe("getAvailableProducts", () => {
 
     test("should filter by model", async () => {
         jest.spyOn(ProductDAO.prototype, "getAvailableProducts").mockResolvedValueOnce(testProducts);
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProducts[0]);
         const controller = new ProductController();
         const response = await controller.getAvailableProducts("model", testProducts[0].model, null);
 
@@ -277,6 +278,7 @@ describe("getAvailableProducts", () => {
 
     test("should return an empty array", async () => {
         jest.spyOn(ProductDAO.prototype, "getAvailableProducts").mockResolvedValueOnce([]);
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(testProducts[0]);
         const controller = new ProductController();
         const response = await controller.getAvailableProducts(null, null, null);
 
@@ -287,12 +289,13 @@ describe("getAvailableProducts", () => {
 
     test("should throw ProductNotFoundError", async () => {
         jest.spyOn(ProductDAO.prototype, "getAvailableProducts").mockResolvedValueOnce([]);
+        jest.spyOn(ProductDAO.prototype, "getProduct").mockResolvedValueOnce(null);
         const controller = new ProductController();
 
         await expect(controller.getAvailableProducts("model", null, testProducts[0].model)).rejects.toThrow(ProductNotFoundError);
 
-        expect(ProductDAO.prototype.getAvailableProducts).toHaveBeenCalledTimes(1);
-        expect(ProductDAO.prototype.getAvailableProducts).toHaveBeenCalledWith("model", testProducts[0].model);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledTimes(1);
+        expect(ProductDAO.prototype.getProduct).toHaveBeenCalledWith(testProducts[0].model);
     });
 });
 

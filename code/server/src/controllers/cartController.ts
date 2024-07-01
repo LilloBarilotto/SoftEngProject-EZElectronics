@@ -70,7 +70,7 @@ class CartController {
       
         if(cart.products && cart.products.length !=0){
             for(let i = 0; i<cart.products.length; i++){
-                let prodotti = await this.productController.getAvailableProducts("model", null, cart.products[i].model)
+                let prodotti = await this.productController.getProducts("model", null, cart.products[i].model)
                 cart.products[i].category = prodotti[0].category;
                 cart.products[i].price =  prodotti[0].sellingPrice;
              }
